@@ -82,7 +82,7 @@ async function checkSeedData() {
       
       students.forEach((student, index) => {
         console.log(`${index + 1}. ${student.name}`);
-        console.log(`   📧 Google Email: ${student.googleEmail}`);
+        console.log(`   📧 Email: ${student.email}`);
         console.log(`   👨‍👩‍👧‍👦 保護者: ${student.parent.name}`);
         console.log(`   🎯 興味分野: ${student.interests.join(', ')}`);
         console.log(`   👨‍🏫 チューター: ${student.pairings.map(p => p.tutor.name).join(', ') || 'なし'}`);
@@ -116,7 +116,7 @@ async function checkSeedData() {
       
       tutors.forEach((tutor, index) => {
         console.log(`${index + 1}. ${tutor.name}`);
-        console.log(`   📧 Google Email: ${tutor.googleEmail}`);
+        console.log(`   📧 Email: ${tutor.email}`);
         console.log(`   🏫 所属: ${tutor.affiliation || 'なし'}`);
         console.log(`   🎯 専門分野: ${tutor.specialties.join(', ')}`);
         console.log(`   👨‍🎓 担当学生: ${tutor.pairings.map(p => p.student.name).join(', ') || 'なし'}`);
@@ -132,19 +132,15 @@ async function checkSeedData() {
     console.log('🔗 リレーション整合性チェック:');
     console.log('━━━━━━━━━━━━━━━━━━━━━━');
     
-    // 孤立した学生（親がいない）
-    const orphanStudents = await prisma.student.count({
-      where: {
-        parent: null
-      }
-    });
-    console.log(`❓ 親がいない学生: ${orphanStudents} 件 ${orphanStudents === 0 ? '✅' : '⚠️'}`);
-    
     // ペアリングの整合性
     const activePairings = await prisma.pairing.count({
       where: { status: 'ACTIVE' }
     });
     console.log(`🤝 アクティブなペアリング: ${activePairings} 件`);
+    
+    // 学習記録の数
+    const learningRecordsCount = await prisma.learningRecord.count();
+    console.log(`📚 学習記録: ${learningRecordsCount} 件`);
 
     console.log('\n🎉 シードデータ確認完了！');
     
