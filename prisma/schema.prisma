@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 基本的なユーザー情報
+model Parent {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  address   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  students Student[]
+
+  @@map("parents")
+}
+
+model Student {
+  id          String   @id @default(cuid())
+  googleEmail String   @unique @map("google_email")
+  name        String
+  parentId    String   @map("parent_id")
+  birthdate   DateTime?
+  gender      String?
+  interests   String[]
+  cautions    String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  parent Parent @relation(fields: [parentId], references: [id])
+
+  @@map("students")
+}
