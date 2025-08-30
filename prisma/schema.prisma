@@ -1,0 +1,405 @@
+// Education Beyond LMS Database Schema
+// This schema defines all entities and relationships for the LMS platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// Core User Entities
+// ============================================================================
+
+model Parent {
+  id        String    @id @default(cuid())
+  email     String    @unique @db.Citext
+  name      String
+  address   String?
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy String?   @map("created_by")
+  updatedBy String?   @map("updated_by")
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  students Student[]
+  payments Payment[]
+
+  @@index([email])
+  @@index([deletedAt])
+  @@map("parents")
+}
+
+model Student {
+  id          String    @id @default(cuid())
+  googleEmail String    @unique @map("google_email") @db.Citext
+  name        String
+  parentId    String    @map("parent_id")
+  birthdate   DateTime? @db.Date
+  gender      Gender?
+  interests   String[]
+  cautions    String?   @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy   String?   @map("created_by")
+  updatedBy   String?   @map("updated_by")
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  parent          Parent           @relation(fields: [parentId], references: [id])
+  learningRecords LearningRecord[]
+  reservations    Reservation[]
+  pairings        Pairing[]
+
+  @@index([googleEmail])
+  @@index([parentId])
+  @@index([deletedAt])
+  @@map("students")
+}
+
+model Tutor {
+  id          String    @id @default(cuid())
+  googleEmail String    @unique @map("google_email") @db.Citext
+  name        String
+  address     String?
+  affiliation String?
+  specialties String[]
+  avatarUrl   String?   @map("avatar_url")
+  payoutInfo  Json?     @map("payout_info")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy   String?   @map("created_by")
+  updatedBy   String?   @map("updated_by")
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  learningRecords LearningRecord[]
+  reservations    Reservation[]
+  pairings        Pairing[]
+  availabilities  Availability[]
+
+  @@index([googleEmail])
+  @@index([deletedAt])
+  @@map("tutors")
+}
+
+model Admin {
+  id          String    @id @default(cuid())
+  googleEmail String    @unique @map("google_email") @db.Citext
+  name        String
+  role        AdminRole @default(ADMIN)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy   String?   @map("created_by")
+  updatedBy   String?   @map("updated_by")
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz
+
+  @@index([googleEmail])
+  @@index([deletedAt])
+  @@map("admins")
+}
+
+// ============================================================================
+// Learning & Reservation Entities
+// ============================================================================
+
+model LearningRecord {
+  id          String    @id @default(cuid())
+  studentId   String    @map("student_id")
+  tutorId     String    @map("tutor_id")
+  date        DateTime  @db.Date
+  summary     String    @db.Text
+  materials   String[]
+  durationMin Int       @map("duration_min")
+  score       Int?
+  tags        String[]
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy   String?   @map("created_by")
+  updatedBy   String?   @map("updated_by")
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  student    Student     @relation(fields: [studentId], references: [id])
+  tutor      Tutor       @relation(fields: [tutorId], references: [id])
+  driveFiles DriveFile[]
+
+  @@index([studentId])
+  @@index([tutorId])
+  @@index([date])
+  @@index([deletedAt])
+  @@map("learning_records")
+}
+
+model Reservation {
+  id        String             @id @default(cuid())
+  studentId String             @map("student_id")
+  tutorId   String             @map("tutor_id")
+  startAt   DateTime           @map("start_at") @db.Timestamptz
+  endAt     DateTime           @map("end_at") @db.Timestamptz
+  channel   ReservationChannel
+  status    ReservationStatus  @default(PENDING)
+  notes     String?            @db.Text
+  createdAt DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime           @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy String?            @map("created_by")
+  updatedBy String?            @map("updated_by")
+  deletedAt DateTime?          @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  student       Student        @relation(fields: [studentId], references: [id])
+  tutor         Tutor          @relation(fields: [tutorId], references: [id])
+  calendarEvent CalendarEvent?
+
+  @@index([studentId])
+  @@index([tutorId])
+  @@index([startAt])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("reservations")
+}
+
+model Pairing {
+  id        String        @id @default(cuid())
+  studentId String        @map("student_id")
+  tutorId   String        @map("tutor_id")
+  status    PairingStatus @default(PENDING)
+  score     Float? // Match compatibility score (0.0-1.0)
+  startedAt DateTime?     @map("started_at") @db.Timestamptz
+  endedAt   DateTime?     @map("ended_at") @db.Timestamptz
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy String?       @map("created_by")
+  updatedBy String?       @map("updated_by")
+  deletedAt DateTime?     @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  student Student @relation(fields: [studentId], references: [id])
+  tutor   Tutor   @relation(fields: [tutorId], references: [id])
+
+  @@unique([studentId, tutorId])
+  @@index([studentId])
+  @@index([tutorId])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("pairings")
+}
+
+model Availability {
+  id         String    @id @default(cuid())
+  tutorId    String    @map("tutor_id")
+  startAt    DateTime  @map("start_at") @db.Timestamptz
+  endAt      DateTime  @map("end_at") @db.Timestamptz
+  recurrence String? // RRULE format for recurring availability
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy  String?   @map("created_by")
+  updatedBy  String?   @map("updated_by")
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  tutor Tutor @relation(fields: [tutorId], references: [id])
+
+  @@index([tutorId])
+  @@index([startAt])
+  @@index([deletedAt])
+  @@map("availabilities")
+}
+
+// ============================================================================
+// External Integration Entities
+// ============================================================================
+
+model CalendarEvent {
+  id            String           @id @default(cuid())
+  reservationId String           @unique @map("reservation_id")
+  provider      ExternalProvider
+  externalId    String           @map("external_id")
+  joinUrl       String?          @map("join_url")
+  createdAt     DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime         @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy     String?          @map("created_by")
+  updatedBy     String?          @map("updated_by")
+  deletedAt     DateTime?        @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  reservation Reservation @relation(fields: [reservationId], references: [id])
+
+  @@unique([provider, externalId])
+  @@index([provider])
+  @@index([deletedAt])
+  @@map("calendar_events")
+}
+
+model DriveFile {
+  id               String           @id @default(cuid())
+  provider         ExternalProvider
+  externalId       String           @map("external_id")
+  mimeType         String           @map("mime_type")
+  filename         String
+  ownerId          String           @map("owner_id")
+  ownerType        FileOwnerType    @map("owner_type")
+  scope            FileScope
+  learningRecordId String?          @map("learning_record_id")
+  createdAt        DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime         @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy        String?          @map("created_by")
+  updatedBy        String?          @map("updated_by")
+  deletedAt        DateTime?        @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  learningRecord LearningRecord? @relation(fields: [learningRecordId], references: [id])
+
+  @@unique([provider, externalId])
+  @@index([ownerId, ownerType])
+  @@index([scope])
+  @@index([learningRecordId])
+  @@index([deletedAt])
+  @@map("drive_files")
+}
+
+model Payment {
+  id         String           @id @default(cuid())
+  parentId   String           @map("parent_id")
+  provider   ExternalProvider
+  externalId String           @map("external_id")
+  amount     Decimal          @db.Decimal(10, 2)
+  currency   String           @default("JPY")
+  status     PaymentStatus    @default(PENDING)
+  receivedAt DateTime?        @map("received_at") @db.Timestamptz
+  dueDate    DateTime?        @map("due_date") @db.Date
+  createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime         @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy  String?          @map("created_by")
+  updatedBy  String?          @map("updated_by")
+  deletedAt  DateTime?        @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  parent Parent @relation(fields: [parentId], references: [id])
+
+  @@unique([provider, externalId])
+  @@index([parentId])
+  @@index([status])
+  @@index([receivedAt])
+  @@index([dueDate])
+  @@index([deletedAt])
+  @@map("payments")
+}
+
+model CRMContact {
+  id         String           @id @default(cuid())
+  provider   ExternalProvider
+  externalId String           @map("external_id")
+  entityType CRMEntityType    @map("entity_type")
+  entityId   String           @map("entity_id")
+  email      String           @db.Citext
+  createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime         @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy  String?          @map("created_by")
+  updatedBy  String?          @map("updated_by")
+  deletedAt  DateTime?        @map("deleted_at") @db.Timestamptz
+
+  @@unique([provider, externalId])
+  @@unique([entityType, entityId])
+  @@index([email])
+  @@index([deletedAt])
+  @@map("crm_contacts")
+}
+
+model MessageLink {
+  id         String            @id @default(cuid())
+  provider   ExternalProvider
+  externalId String            @map("external_id")
+  channelUrl String            @map("channel_url")
+  entityType MessageEntityType @map("entity_type")
+  entityId   String            @map("entity_id")
+  createdAt  DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime          @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy  String?           @map("created_by")
+  updatedBy  String?           @map("updated_by")
+  deletedAt  DateTime?         @map("deleted_at") @db.Timestamptz
+
+  @@unique([provider, externalId])
+  @@index([entityType, entityId])
+  @@index([deletedAt])
+  @@map("message_links")
+}
+
+// ============================================================================
+// Enums
+// ============================================================================
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  MODERATOR
+}
+
+enum ReservationChannel {
+  MEET
+  ONSITE
+  OTHER
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum PairingStatus {
+  PENDING
+  ACTIVE
+  ENDED
+  CANCELLED
+}
+
+enum ExternalProvider {
+  GOOGLE
+  HUBSPOT
+  MONEYFORWARD
+  LINE
+  SLACK
+}
+
+enum FileOwnerType {
+  STUDENT
+  TUTOR
+  ADMIN
+}
+
+enum FileScope {
+  PRIVATE
+  STUDENT_PARENT
+  STUDENT_TUTOR
+  PUBLIC
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum CRMEntityType {
+  PARENT
+  STUDENT
+  TUTOR
+}
+
+enum MessageEntityType {
+  PARENT
+  TUTOR
+}
