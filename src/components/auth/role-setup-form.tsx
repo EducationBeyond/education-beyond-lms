@@ -79,7 +79,7 @@ export function RoleSetupForm({ userEmail }: RoleSetupFormProps) {
 
       // ページをリフレッシュしてセッションを更新
       router.refresh();
-      router.push('/dashboard');
+      router.push('/');
     } catch (error) {
       console.error('Role setup error:', error);
       setError(error instanceof Error ? error.message : 'エラーが発生しました');

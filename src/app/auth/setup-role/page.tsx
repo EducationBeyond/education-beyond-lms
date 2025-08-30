@@ -10,9 +10,9 @@ export default async function SetupRolePage() {
     redirect('/auth/signin');
   }
 
-  // 既にロールが設定済みの場合はダッシュボードにリダイレクト
+  // 既にロールが設定済みの場合はホームにリダイレクト
   if (session.user.role) {
-    redirect('/dashboard');
+    redirect('/');
   }
 
   return (

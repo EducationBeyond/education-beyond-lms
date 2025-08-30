@@ -5,6 +5,10 @@ import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface FormData {
   email: string;
@@ -68,69 +72,61 @@ export function SignInForm() {
     <div className="space-y-6">
       {/* Success Message */}
       {message === 'registration-success' && (
-        <div className="bg-green-50 border border-green-200 rounded-md p-4">
-          <p className="text-sm text-green-800">
+        <Alert>
+          <AlertDescription>
             アカウントが作成されました。ログインしてください。
-          </p>
-        </div>
+          </AlertDescription>
+        </Alert>
       )}
 
       {/* Login Method Toggle */}
-      <div className="flex rounded-lg border border-gray-200 p-1">
-        <button
+      <div className="flex rounded-lg border p-1">
+        <Button
           type="button"
           onClick={() => setLoginMethod('credentials')}
-          className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
-            loginMethod === 'credentials'
-              ? 'bg-blue-600 text-white'
-              : 'text-gray-700 hover:text-gray-900'
-          }`}
+          variant={loginMethod === 'credentials' ? 'default' : 'ghost'}
+          className="flex-1"
+          size="sm"
         >
           メール/パスワード
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={() => setLoginMethod('google')}
-          className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
-            loginMethod === 'google'
-              ? 'bg-blue-600 text-white'
-              : 'text-gray-700 hover:text-gray-900'
-          }`}
+          variant={loginMethod === 'google' ? 'default' : 'ghost'}
+          className="flex-1"
+          size="sm"
         >
           Google
-        </button>
+        </Button>
       </div>
 
       {/* Credentials Form */}
       {loginMethod === 'credentials' && (
         <form onSubmit={handleCredentialsSignIn} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              メールアドレス
-            </label>
-            <input
+          <div className="space-y-2">
+            <Label htmlFor="email">メールアドレス</Label>
+            <Input
               id="email"
               name="email"
               type="email"
               required
               value={formData.email}
               onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              placeholder="your-email@example.com"
             />
           </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              パスワード
-            </label>
-            <input
+          <div className="space-y-2">
+            <Label htmlFor="password">パスワード</Label>
+            <Input
               id="password"
               name="password"
               type="password"
               required
               value={formData.password}
               onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              placeholder="パスワードを入力"
             />
           </div>
 
@@ -149,11 +145,12 @@ export function SignInForm() {
         <Button
           onClick={handleGoogleSignIn}
           disabled={isLoading}
-          className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full"
+          variant="outline"
         >
           {isLoading ? (
             <span className="flex items-center">
-              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
@@ -175,22 +172,22 @@ export function SignInForm() {
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-sm text-red-800">{error}</p>
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {/* Register Link */}
       <div className="text-center">
         <Link
           href="/auth/register"
-          className="text-blue-600 hover:text-blue-500 text-sm"
+          className="text-primary hover:underline text-sm"
         >
           新規アカウント作成はこちら
         </Link>
       </div>
 
-      <div className="text-center text-xs text-gray-500">
+      <div className="text-center text-xs text-muted-foreground">
         ログインすることで、利用規約とプライバシーポリシーに同意したものとみなされます。
       </div>
     </div>

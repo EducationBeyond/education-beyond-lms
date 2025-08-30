@@ -66,16 +66,10 @@ export function Header() {
                 {session.user.role && (
                   <nav className="hidden md:flex space-x-4">
                     <Link
-                      href="/dashboard"
+                      href="/"
                       className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
                     >
-                      ダッシュボード
-                    </Link>
-                    <Link
-                      href="/profile"
-                      className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-                    >
-                      プロフィール
+                      ホーム
                     </Link>
                   </nav>
                 )}
