@@ -17,6 +17,7 @@ datasource db {
 model Parent {
   id        String    @id @default(cuid())
   email     String    @unique @db.Citext
+  password  String?   // for email/password login (optional for OAuth users)
   name      String
   address   String?
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
@@ -36,7 +37,8 @@ model Parent {
 
 model Student {
   id          String    @id @default(cuid())
-  googleEmail String    @unique @map("google_email") @db.Citext
+  email       String    @unique @db.Citext
+  password    String?   // for email/password login (optional for OAuth users)
   name        String
   parentId    String    @map("parent_id")
   birthdate   DateTime? @db.Date
@@ -55,7 +57,7 @@ model Student {
   reservations    Reservation[]
   pairings        Pairing[]
 
-  @@index([googleEmail])
+  @@index([email])
   @@index([parentId])
   @@index([deletedAt])
   @@map("students")
@@ -63,7 +65,8 @@ model Student {
 
 model Tutor {
   id          String    @id @default(cuid())
-  googleEmail String    @unique @map("google_email") @db.Citext
+  email       String    @unique @db.Citext
+  password    String?   // for email/password login (optional for OAuth users)
   name        String
   address     String?
   affiliation String?
@@ -82,14 +85,15 @@ model Tutor {
   pairings        Pairing[]
   availabilities  Availability[]
 
-  @@index([googleEmail])
+  @@index([email])
   @@index([deletedAt])
   @@map("tutors")
 }
 
 model Admin {
   id          String    @id @default(cuid())
-  googleEmail String    @unique @map("google_email") @db.Citext
+  email       String    @unique @db.Citext
+  password    String?   // for email/password login (optional for OAuth users)
   name        String
   role        AdminRole @default(ADMIN)
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
@@ -98,7 +102,7 @@ model Admin {
   updatedBy   String?   @map("updated_by")
   deletedAt   DateTime? @map("deleted_at") @db.Timestamptz
 
-  @@index([googleEmail])
+  @@index([email])
   @@index([deletedAt])
   @@map("admins")
 }

@@ -27,7 +27,7 @@ async function main() {
   // Create sample students
   const student1 = await prisma.student.create({
     data: {
-      googleEmail: "tanaka.yuki@student.example.com",
+      email: "tanaka.yuki@student.example.com",
       name: "田中 由紀",
       parentId: parent1.id,
       birthdate: new Date("2010-04-15"),
@@ -40,7 +40,7 @@ async function main() {
 
   const student2 = await prisma.student.create({
     data: {
-      googleEmail: "suzuki.kenta@student.example.com",
+      email: "suzuki.kenta@student.example.com",
       name: "鈴木 健太",
       parentId: parent2.id,
       birthdate: new Date("2012-08-22"),
@@ -53,7 +53,7 @@ async function main() {
   // Create sample tutors
   const tutor1 = await prisma.tutor.create({
     data: {
-      googleEmail: "yamada.sensei@tutor.example.com",
+      email: "yamada.sensei@tutor.example.com",
       name: "山田 太郎",
       address: "東京都新宿区3-3-3",
       affiliation: "東京大学大学院",
@@ -71,7 +71,7 @@ async function main() {
 
   const tutor2 = await prisma.tutor.create({
     data: {
-      googleEmail: "sato.sensei@tutor.example.com",
+      email: "sato.sensei@tutor.example.com",
       name: "佐藤 花子",
       address: "千葉県千葉市4-4-4",
       affiliation: "早稲田大学",
@@ -83,7 +83,7 @@ async function main() {
   // Create sample admin
   const admin1 = await prisma.admin.create({
     data: {
-      googleEmail: "admin@educationbeyond.com",
+      email: "admin@educationbeyond.com",
       name: "管理者",
       role: "SUPER_ADMIN",
       createdBy: "system",

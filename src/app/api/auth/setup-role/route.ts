@@ -34,10 +34,6 @@ export async function POST(request: NextRequest) {
 
     // ロールに応じてユーザーを作成
     let result;
-    const userData = {
-      googleEmail: email,
-      name: session.user.name || 'Unknown User',
-    };
 
     switch (role) {
       case 'STUDENT':
@@ -45,11 +41,12 @@ export async function POST(request: NextRequest) {
         // 実際の運用では、Parentが先に登録されている必要がある
         result = await prisma.student.create({
           data: {
-            ...userData,
+            email,
+            name: session.user.name || 'Unknown Student',
             parent: {
               create: {
-                email: email, // 一時的に同じメールアドレスを使用
-                name: session.user.name || 'Unknown Parent',
+                email: `temp.parent.${Date.now()}@temp.example.com`,
+                name: `${session.user.name || 'Unknown Student'}の保護者（未設定）`,
               },
             },
           },
@@ -67,7 +64,10 @@ export async function POST(request: NextRequest) {
 
       case 'TUTOR':
         result = await prisma.tutor.create({
-          data: userData,
+          data: {
+            email,
+            name: session.user.name || 'Unknown Tutor',
+          },
         });
         break;
 
@@ -103,10 +103,10 @@ export async function POST(request: NextRequest) {
 async function findUserByEmail(email: string): Promise<boolean> {
   try {
     const [student, parent, tutor, admin] = await Promise.all([
-      prisma.student.findUnique({ where: { googleEmail: email } }),
+      prisma.student.findUnique({ where: { email: email } }),
       prisma.parent.findUnique({ where: { email: email } }),
-      prisma.tutor.findUnique({ where: { googleEmail: email } }),
-      prisma.admin.findUnique({ where: { googleEmail: email } }),
+      prisma.tutor.findUnique({ where: { email: email } }),
+      prisma.admin.findUnique({ where: { email: email } }),
     ]);
 
     return !!(student || parent || tutor || admin);
