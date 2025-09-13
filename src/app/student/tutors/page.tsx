@@ -44,7 +44,7 @@ export default function StudentTutorsPage() {
 
   useEffect(() => {
     if (status === 'loading') return;
-    
+
     if (!session?.user) {
       router.push('/login');
       return;
@@ -56,14 +56,14 @@ export default function StudentTutorsPage() {
   const fetchTutors = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await fetch('/api/tutors');
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch tutors');
       }
-      
+
       const data = await response.json();
       setTutors(data.tutors);
     } catch (error) {
@@ -91,7 +91,7 @@ export default function StudentTutorsPage() {
       tutor.name.toLowerCase().includes(searchLower) ||
       tutor.furigana?.toLowerCase().includes(searchLower) ||
       tutor.affiliation?.toLowerCase().includes(searchLower) ||
-      tutor.specialties.some(specialty => 
+      tutor.specialties.some(specialty =>
         (specialtyMap[specialty] || specialty).toLowerCase().includes(searchLower)
       )
     );
@@ -106,7 +106,7 @@ export default function StudentTutorsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">チューター一覧</h1>
         <p className="text-gray-600">
@@ -244,6 +244,6 @@ export default function StudentTutorsPage() {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
       />
-    </div>
+    </>
   );
 }
