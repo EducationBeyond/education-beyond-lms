@@ -59,7 +59,7 @@ async function main() {
       affiliation: "東京大学大学院",
       specialties: ["mathematics", "physics", "chemistry"],
       avatarUrl: "https://example.com/avatars/yamada.jpg",
-      payoutInfo: {
+      bankAccountInfo: {
         bankName: "三菱UFJ銀行",
         branchName: "新宿支店",
         accountType: "普通",

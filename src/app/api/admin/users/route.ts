@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '../../../../../auth';
 import { PrismaClient } from '@prisma/client';
+import { getUserRole } from '@/lib/user-role';
 
 const prisma = new PrismaClient();
 
@@ -8,7 +9,12 @@ export async function GET(request: NextRequest) {
   try {
     const session = await auth();
     
-    if (!session?.user?.id || session.user.role !== 'ADMIN') {
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userRole = await getUserRole(session.user.email);
+    if (userRole !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

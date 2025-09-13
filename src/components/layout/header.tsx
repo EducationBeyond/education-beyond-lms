@@ -3,14 +3,6 @@
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import type { UserRole } from '@/auth';
-
-const roleLabels: Record<UserRole, string> = {
-  STUDENT: '生徒',
-  PARENT: '保護者',
-  TUTOR: 'チューター',
-  ADMIN: '管理者',
-};
 
 export function Header() {
   const { data: session, status } = useSession();
@@ -54,62 +46,46 @@ export function Header() {
                     <p className="text-sm font-medium text-gray-700">
                       {session.user.name}
                     </p>
-                    {session.user.role && (
-                      <p className="text-xs text-gray-500">
-                        {roleLabels[session.user.role]}
-                      </p>
-                    )}
                   </div>
                 </div>
 
                 {/* Navigation Links */}
-                {session.user.role && (
-                  <nav className="hidden md:flex space-x-4">
-                    <Link
-                      href="/"
-                      className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-                    >
-                      ホーム
-                    </Link>
-                    
-                    {/* Role-based profile links */}
-                    {session.user.role === 'STUDENT' && (
-                      <Link
-                        href="/profile/student"
-                        className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-                      >
-                        プロフィール
-                      </Link>
-                    )}
-                    
-                    {session.user.role === 'PARENT' && (
-                      <Link
-                        href="/profile/parent"
-                        className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-                      >
-                        プロフィール
-                      </Link>
-                    )}
-                    
-                    {session.user.role === 'TUTOR' && (
-                      <Link
-                        href="/profile/tutor"
-                        className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-                      >
-                        プロフィール
-                      </Link>
-                    )}
-                    
-                    {session.user.role === 'ADMIN' && (
-                      <Link
-                        href="/admin/users"
-                        className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-                      >
-                        ユーザー管理
-                      </Link>
-                    )}
-                  </nav>
-                )}
+                <nav className="hidden md:flex space-x-4">
+                  <Link
+                    href="/"
+                    className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    ホーム
+                  </Link>
+                  
+                  <Link
+                    href="/student/profile"
+                    className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    学生プロフィール
+                  </Link>
+                  
+                  <Link
+                    href="/parent/profile"
+                    className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    保護者プロフィール
+                  </Link>
+                  
+                  <Link
+                    href="/tutor/profile"
+                    className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    チュータープロフィール
+                  </Link>
+                  
+                  <Link
+                    href="/admin/users"
+                    className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    ユーザー管理
+                  </Link>
+                </nav>
 
                 {/* Sign Out Button */}
                 <Button
@@ -122,7 +98,7 @@ export function Header() {
                 </Button>
               </div>
             ) : (
-              <Link href="/auth/signin">
+              <Link href="/login">
                 <Button size="sm">
                   ログイン
                 </Button>

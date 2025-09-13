@@ -28,9 +28,7 @@ export default async function ForbiddenPage() {
                 権限エラー（403）
               </h3>
               <p className="mt-1 text-sm text-yellow-700">
-                {session?.user?.role 
-                  ? `現在のロール: ${session.user.role}` 
-                  : 'ユーザーロールが設定されていません。'}
+                このページへのアクセス権限がありません。
               </p>
             </div>
           </div>

@@ -2,48 +2,51 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '../../../../auth';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
+import { getUserRole } from '@/lib/user-role';
 
 const prisma = new PrismaClient();
 
 const studentProfileSchema = z.object({
   name: z.string().min(1, '名前は必須です'),
-  birthdate: z.string().optional(),
-  gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
+  furigana: z.string().optional().nullable(),
+  address: z.string().optional().nullable(),
+  birthdate: z.string().optional().nullable(),
+  gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional().nullable(),
+  giftedTraits: z.array(z.string()).optional(),
   interests: z.array(z.string()).optional(),
-  cautions: z.string().optional(),
+  cautions: z.string().optional().nullable(),
 });
 
 const parentProfileSchema = z.object({
   name: z.string().min(1, '名前は必須です'),
-  address: z.string().optional(),
+  address: z.string().optional().nullable(),
 });
 
 const tutorProfileSchema = z.object({
   name: z.string().min(1, '名前は必須です'),
-  affiliation: z.string().optional(),
-  address: z.string().optional(),
+  furigana: z.string().optional().nullable(),
+  address: z.string().optional().nullable(),
+  affiliation: z.string().optional().nullable(),
   specialties: z.array(z.string()).optional(),
-  avatarUrl: z.string().optional(),
-  payoutInfo: z.string().optional(),
+  avatarUrl: z.string().optional().nullable(),
+  bankAccountInfo: z.union([z.string(), z.object({}).passthrough()]).optional().nullable(),
 });
 
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
     
-    if (!session?.user?.id) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userId = session.user.id;
-    const userRole = session.user.role;
-
+    const userRole = await getUserRole(session.user.email);
     let profile = null;
 
     switch (userRole) {
-      case 'STUDENT':
+      case 'student':
         profile = await prisma.student.findUnique({
-          where: { id: userId },
+          where: { email: session.user.email },
           include: {
             parent: {
               select: { id: true, name: true }
@@ -51,9 +54,9 @@ export async function GET(request: NextRequest) {
           }
         });
         break;
-      case 'PARENT':
+      case 'parent':
         profile = await prisma.parent.findUnique({
-          where: { id: userId },
+          where: { email: session.user.email },
           include: {
             students: {
               select: { id: true, name: true }
@@ -61,14 +64,14 @@ export async function GET(request: NextRequest) {
           }
         });
         break;
-      case 'TUTOR':
+      case 'tutor':
         profile = await prisma.tutor.findUnique({
-          where: { id: userId }
+          where: { email: session.user.email }
         });
         break;
-      case 'ADMIN':
+      case 'admin':
         profile = await prisma.admin.findUnique({
-          where: { id: userId }
+          where: { email: session.user.email }
         });
         break;
       default:
@@ -90,35 +93,43 @@ export async function PUT(request: NextRequest) {
   try {
     const session = await auth();
     
-    if (!session?.user?.id) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userId = session.user.id;
-    const userRole = session.user.role;
+    const userRole = await getUserRole(session.user.email);
     const body = await request.json();
-
+    
+    console.log('[API Profile] Update request:', {
+      userRole,
+      email: session.user.email,
+      body: body
+    });
+    
     let updatedProfile = null;
 
     switch (userRole) {
-      case 'STUDENT': {
+      case 'student': {
         const validatedData = studentProfileSchema.parse(body);
         updatedProfile = await prisma.student.update({
-          where: { id: userId },
+          where: { email: session.user.email },
           data: {
             name: validatedData.name,
+            furigana: validatedData.furigana,
+            address: validatedData.address,
             birthdate: validatedData.birthdate ? new Date(validatedData.birthdate) : undefined,
             gender: validatedData.gender,
+            giftedTraits: validatedData.giftedTraits || [],
             interests: validatedData.interests || [],
             cautions: validatedData.cautions,
           }
         });
         break;
       }
-      case 'PARENT': {
+      case 'parent': {
         const validatedData = parentProfileSchema.parse(body);
         updatedProfile = await prisma.parent.update({
-          where: { id: userId },
+          where: { email: session.user.email },
           data: {
             name: validatedData.name,
             address: validatedData.address,
@@ -126,18 +137,25 @@ export async function PUT(request: NextRequest) {
         });
         break;
       }
-      case 'TUTOR': {
+      case 'tutor': {
         const validatedData = tutorProfileSchema.parse(body);
+        console.log('[API Profile] Validated data for tutor:', validatedData);
+        
+        const updateData = {
+          name: validatedData.name,
+          furigana: validatedData.furigana,
+          affiliation: validatedData.affiliation,
+          address: validatedData.address,
+          specialties: validatedData.specialties || [],
+          avatarUrl: validatedData.avatarUrl,
+          bankAccountInfo: validatedData.bankAccountInfo,
+        };
+        
+        console.log('[API Profile] Update data:', updateData);
+        
         updatedProfile = await prisma.tutor.update({
-          where: { id: userId },
-          data: {
-            name: validatedData.name,
-            affiliation: validatedData.affiliation,
-            address: validatedData.address,
-            specialties: validatedData.specialties || [],
-            avatarUrl: validatedData.avatarUrl,
-            payoutInfo: validatedData.payoutInfo,
-          }
+          where: { email: session.user.email },
+          data: updateData
         });
         break;
       }
@@ -148,10 +166,15 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ profile: updatedProfile });
   } catch (error) {
     if (error instanceof z.ZodError) {
+      console.error('[API Profile] Validation error:', error.issues);
       return NextResponse.json({ error: 'Validation failed', details: error.issues }, { status: 400 });
     }
 
-    console.error('Profile update error:', error);
+    console.error('[API Profile] Update error:', error);
+    console.error('[API Profile] Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

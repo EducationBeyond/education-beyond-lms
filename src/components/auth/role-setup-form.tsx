@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import type { UserRole } from '@/auth';
+import type { UserRole } from '@/lib/user-role';
 
 interface RoleSetupFormProps {
   userEmail: string;
@@ -18,7 +18,7 @@ interface RoleOption {
 
 const roleOptions: RoleOption[] = [
   {
-    value: 'STUDENT',
+    value: 'student',
     label: '生徒',
     description: '学習記録の閲覧、チューター検索・予約ができます',
     icon: (
@@ -28,7 +28,7 @@ const roleOptions: RoleOption[] = [
     ),
   },
   {
-    value: 'PARENT',
+    value: 'parent',
     label: '保護者',
     description: '子供の学習記録閲覧、支払い情報管理ができます',
     icon: (
@@ -38,7 +38,7 @@ const roleOptions: RoleOption[] = [
     ),
   },
   {
-    value: 'TUTOR',
+    value: 'tutor',
     label: 'チューター',
     description: '稼働枠管理、予約確認・承認、学習記録作成ができます',
     icon: (

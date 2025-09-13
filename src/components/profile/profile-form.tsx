@@ -15,8 +15,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 
 export const studentProfileSchema = z.object({
   name: z.string().min(1, '名前は必須です'),
+  furigana: z.string().optional(),
+  address: z.string().optional(),
   birthdate: z.string().optional(),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
+  giftedTraits: z.array(z.string()).optional(),
   interests: z.array(z.string()).optional(),
   cautions: z.string().optional(),
 });
@@ -28,11 +31,12 @@ export const parentProfileSchema = z.object({
 
 export const tutorProfileSchema = z.object({
   name: z.string().min(1, '名前は必須です'),
-  affiliation: z.string().optional(),
+  furigana: z.string().optional(),
   address: z.string().optional(),
+  affiliation: z.string().optional(),
   specialties: z.array(z.string()).optional(),
   avatarUrl: z.string().optional(),
-  payoutInfo: z.string().optional(),
+  bankAccountInfo: z.string().optional(),
 });
 
 interface ProfileFormProps {
@@ -59,9 +63,23 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
     }
   };
 
+  // nullの値を空文字列に変換してデフォルト値を準備
+  const getDefaultValues = () => {
+    if (!initialData) return {};
+    
+    const cleanedData = { ...initialData };
+    Object.keys(cleanedData).forEach(key => {
+      if (cleanedData[key] === null) {
+        cleanedData[key] = '';
+      }
+    });
+    
+    return cleanedData;
+  };
+
   const form = useForm({
     resolver: zodResolver(getSchema()),
-    defaultValues: initialData || {},
+    defaultValues: getDefaultValues(),
   });
 
   const handleSubmit = async (data: any) => {
@@ -119,12 +137,52 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
                 <FormItem>
                   <FormLabel>名前</FormLabel>
                   <FormControl>
-                    <Input placeholder="名前を入力" {...field} />
+                    <Input placeholder="名前を入力" {...field} value={field.value || ''} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            {(role === 'STUDENT' || role === 'TUTOR') && (
+              <FormField
+                control={form.control}
+                name="furigana"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ふりがな</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="ふりがなを入力" 
+                        {...field} 
+                        value={field.value || ''}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {(role === 'STUDENT' || role === 'TUTOR' || role === 'PARENT') && (
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>住所</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="住所を入力"
+                        {...field}
+                        value={field.value || ''}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             {role === 'STUDENT' && (
               <>
@@ -135,7 +193,7 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
                     <FormItem>
                       <FormLabel>誕生日</FormLabel>
                       <FormControl>
-                        <Input type="date" {...field} />
+                        <Input type="date" {...field} value={field.value || ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -166,6 +224,19 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
                 />
 
                 <div className="space-y-2">
+                  <Label htmlFor="giftedTraits">ギフテッド特性（カンマ区切り）</Label>
+                  <Input
+                    id="giftedTraits"
+                    placeholder="記憶力, 論理的思考, 創造性"
+                    defaultValue={initialData?.giftedTraits?.join(', ') || ''}
+                    onChange={(e) => {
+                      const giftedTraits = formatInterestsArray(e.target.value);
+                      form.setValue('giftedTraits', giftedTraits);
+                    }}
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="interests">興味分野（カンマ区切り）</Label>
                   <Input
                     id="interests"
@@ -183,11 +254,12 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
                   name="cautions"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>注意事項</FormLabel>
+                      <FormLabel>気をつけること</FormLabel>
                       <FormControl>
                         <Textarea 
                           placeholder="アレルギーや特記事項があれば記入"
                           {...field}
+                          value={field.value || ''}
                         />
                       </FormControl>
                       <FormMessage />
@@ -197,24 +269,6 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
               </>
             )}
 
-            {role === 'PARENT' && (
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>住所</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="住所を入力"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
 
             {role === 'TUTOR' && (
               <>
@@ -225,29 +279,13 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
                     <FormItem>
                       <FormLabel>所属</FormLabel>
                       <FormControl>
-                        <Input placeholder="大学名、会社名など" {...field} />
+                        <Input placeholder="大学名、会社名など" {...field} value={field.value || ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>住所</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="住所を入力"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
 
                 <div className="space-y-2">
                   <Label htmlFor="specialties">専門分野（カンマ区切り）</Label>
@@ -264,14 +302,15 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
 
                 <FormField
                   control={form.control}
-                  name="payoutInfo"
+                  name="bankAccountInfo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>支払い先情報</FormLabel>
+                      <FormLabel>振込先</FormLabel>
                       <FormControl>
                         <Textarea 
                           placeholder="銀行口座情報など"
                           {...field}
+                          value={field.value || ''}
                         />
                       </FormControl>
                       <FormMessage />

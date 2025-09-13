@@ -30,6 +30,7 @@ export function SignInForm() {
 
   const handleRoleBasedRedirect = async (email: string) => {
     try {
+      console.log(`[SignInForm] Attempting to get role for email: ${email}`);
       const response = await fetch('/api/user/role', {
         method: 'POST',
         headers: {
@@ -40,14 +41,21 @@ export function SignInForm() {
 
       if (response.ok) {
         const { redirectPath } = await response.json();
-        router.push(redirectPath);
+        console.log(`[SignInForm] Role API returned redirectPath: ${redirectPath}`);
+        console.log(`[SignInForm] About to call router.push(${redirectPath})`);
+        
+        // 即座にリダイレクト
+        window.location.href = redirectPath;
       } else {
-        console.error('Role detection failed:', await response.text());
-        router.push('/');
+        const errorText = await response.text();
+        console.error('[SignInForm] Role detection failed:', errorText);
+        console.log('[SignInForm] Falling back to callbackUrl:', callbackUrl);
+        window.location.href = callbackUrl;
       }
     } catch (error) {
-      console.error('Role redirect error:', error);
-      router.push('/');
+      console.error('[SignInForm] Role redirect error:', error);
+      console.log('[SignInForm] Falling back to callbackUrl:', callbackUrl);
+      window.location.href = callbackUrl;
     }
   };
 
@@ -57,6 +65,7 @@ export function SignInForm() {
     setError(null);
 
     try {
+      console.log('[SignInForm] Starting credentials sign in for:', formData.email);
       const result = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
@@ -64,14 +73,18 @@ export function SignInForm() {
         redirect: false,
       });
 
+      console.log('[SignInForm] Credentials signIn result:', result);
+
       if (result?.error) {
+        console.error('[SignInForm] Credentials auth error:', result.error);
         setError('メールアドレスまたはパスワードが正しくありません');
       } else if (result?.ok) {
         // 認証成功時はロール別リダイレクト
+        console.log('[SignInForm] Credentials auth successful, proceeding to role redirect');
         await handleRoleBasedRedirect(formData.email);
       }
     } catch (error) {
-      console.error('Credentials sign in error:', error);
+      console.error('[SignInForm] Credentials sign in error:', error);
       setError('ログインに失敗しました');
     } finally {
       setIsLoading(false);
@@ -81,24 +94,32 @@ export function SignInForm() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
+      console.log('[SignInForm] Starting Google sign in...');
       const result = await signIn('google', {
         callbackUrl,
         redirect: false,
       });
       
+      console.log('[SignInForm] Google signIn result:', result);
+      
       if (result?.ok) {
         // Google認証成功後、セッションを取得してロール別リダイレクト
+        console.log('[SignInForm] Google auth successful, getting session...');
         const session = await getSession();
+        console.log('[SignInForm] Session obtained:', session);
+        
         if (session?.user?.email) {
           await handleRoleBasedRedirect(session.user.email);
         } else {
-          router.push('/');
+          console.log('[SignInForm] No email in session, redirecting to homepage');
+          window.location.href = '/';
         }
       } else if (result?.error) {
+        console.error('[SignInForm] Google auth error:', result.error);
         setError('Googleログインに失敗しました');
       }
     } catch (error) {
-      console.error('Google sign in error:', error);
+      console.error('[SignInForm] Google sign in error:', error);
       setError('Googleログインに失敗しました');
     } finally {
       setIsLoading(false);

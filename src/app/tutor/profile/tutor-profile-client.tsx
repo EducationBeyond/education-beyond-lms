@@ -19,6 +19,11 @@ export function TutorProfileClient({ initialData }: TutorProfileClientProps) {
   const handleSubmit = async (data: any) => {
     // 画像URLを含める
     data.avatarUrl = avatarUrl;
+    // payoutInfoがあればbankAccountInfoに変換（後方互換性のため）
+    if (data.payoutInfo && !data.bankAccountInfo) {
+      data.bankAccountInfo = data.payoutInfo;
+      delete data.payoutInfo;
+    }
     const response = await fetch('/api/profile', {
       method: 'PUT',
       headers: {

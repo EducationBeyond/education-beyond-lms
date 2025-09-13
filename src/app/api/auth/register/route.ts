@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
-import type { UserRole } from '@/auth';
+import type { UserRole } from '@/lib/user-role';
 
 const prisma = new PrismaClient();
 

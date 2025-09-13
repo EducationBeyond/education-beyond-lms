@@ -2,16 +2,18 @@ import { Suspense } from 'react';
 import { RoleSetupForm } from '@/components/auth/role-setup-form';
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
+import { getUserRole } from '@/lib/user-role';
 
 export default async function SetupRolePage() {
   const session = await auth();
   
   if (!session?.user) {
-    redirect('/auth/signin');
+    redirect('/login');
   }
 
   // 既にロールが設定済みの場合はホームにリダイレクト
-  if (session.user.role) {
+  const userRole = await getUserRole(session.user.email!);
+  if (userRole) {
     redirect('/');
   }
 

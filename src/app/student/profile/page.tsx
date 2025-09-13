@@ -1,7 +1,8 @@
-import { auth } from '../../../../auth';
+import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { PrismaClient } from '@prisma/client';
 import { StudentProfileClient } from './student-profile-client';
+import { getUserRole } from '@/lib/user-role';
 
 const prisma = new PrismaClient();
 
@@ -9,15 +10,16 @@ export default async function StudentProfilePage() {
   const session = await auth();
 
   if (!session?.user) {
-    redirect('/auth/signin');
+    redirect('/login');
   }
 
-  if (session.user.role !== 'STUDENT') {
-    redirect('/auth/forbidden');
+  const userRole = await getUserRole(session.user.email!);
+  if (userRole !== 'student') {
+    redirect('/login');
   }
 
   const student = await prisma.student.findUnique({
-    where: { id: session.user.id },
+    where: { email: session.user.email! },
     include: {
       parent: {
         select: { id: true, name: true }
@@ -26,7 +28,7 @@ export default async function StudentProfilePage() {
   });
 
   if (!student) {
-    redirect('/auth/forbidden');
+    redirect('/login');
   }
 
   return (

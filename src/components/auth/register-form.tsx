@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import type { UserRole } from '@/auth';
+import type { UserRole } from '@/lib/user-role';
 
 interface RegisterData {
   email: string;

@@ -1,16 +1,18 @@
 import { auth } from '../../../../auth';
 import { redirect } from 'next/navigation';
 import { AdminUsersClient } from './admin-users-client';
+import { getUserRole } from '@/lib/user-role';
 
 export default async function AdminUsersPage() {
   const session = await auth();
 
   if (!session?.user) {
-    redirect('/auth/signin');
+    redirect('/login');
   }
 
-  if (session.user.role !== 'ADMIN') {
-    redirect('/auth/forbidden');
+  const userRole = await getUserRole(session.user.email!);
+  if (userRole !== 'admin') {
+    redirect('/login');
   }
 
   return (

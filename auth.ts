@@ -8,7 +8,7 @@ import { getUserRole, getRoleRedirectPath } from "@/lib/user-role";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
-  session: { strategy: "database" }, // or "jwt"
+  session: { strategy: "jwt" },
   secret: process.env.AUTH_SECRET,
   providers: [
     Google({
@@ -27,10 +27,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!c?.email || !c?.password) return null;
         // 認証は users テーブルの password_hash を参照
         const user = await prisma.user.findUnique({
-          where: { email: c.email },
+          where: { email: c.email as string },
         });
         if (!user?.passwordHash) return null;
-        const ok = await compare(c.password, user.passwordHash);
+        const ok = await compare(c.password as string, user.passwordHash);
         return ok ? { id: user.id, email: user.email!, name: user.name ?? undefined } : null;
       },
     }),
@@ -43,14 +43,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // 例: Google の email_verified 相当を確認していない場合は拒否…などを実装
       return true;
     },
-    async session({ session, user }) {
+    async jwt({ token, user }) {
       if (user) {
-        (session as any).userId = user.id;
-        // ユーザーのロールを取得してセッションに追加
+        token.userId = user.id;
+        // ユーザーのロールを取得してトークンに追加
         if (user.email) {
           const role = await getUserRole(user.email);
-          (session as any).userRole = role;
+          token.userRole = role;
         }
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token) {
+        (session as any).userId = token.userId;
+        (session as any).userRole = token.userRole;
       }
       return session;
     },

@@ -106,22 +106,25 @@ model Parent {
 }
 
 model Student {
-  id          String    @id @default(cuid())
-  email       String    @unique @db.Citext
+  id               String    @id @default(cuid())
+  email            String    @unique @db.Citext
   /// DEPRECATED: 認証は users.password_hash へ集約予定
-  password    String?
-  name        String
-  parentId    String    @map("parent_id")
-  userId      String?   @unique @map("user_id")
-  birthdate   DateTime? @db.Date
-  gender      Gender?
-  interests   String[]
-  cautions    String?   @db.Text
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz
-  createdBy   String?   @map("created_by")
-  updatedBy   String?   @map("updated_by")
-  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz
+  password         String?
+  name             String
+  furigana         String?
+  parentId         String    @map("parent_id")
+  userId           String?   @unique @map("user_id")
+  address          String?
+  birthdate        DateTime? @db.Date
+  gender           Gender?
+  giftedTraits     String[]  @map("gifted_traits")
+  interests        String[]
+  cautions         String?   @db.Text
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy        String?   @map("created_by")
+  updatedBy        String?   @map("updated_by")
+  deletedAt        DateTime? @map("deleted_at") @db.Timestamptz
 
   // Relations
   user            User?            @relation(fields: [userId], references: [id])
@@ -137,22 +140,23 @@ model Student {
 }
 
 model Tutor {
-  id          String    @id @default(cuid())
-  email       String    @unique @db.Citext
+  id               String    @id @default(cuid())
+  email            String    @unique @db.Citext
   /// DEPRECATED: 認証は users.password_hash へ集約予定
-  password    String?
-  name        String
-  address     String?
-  affiliation String?
-  specialties String[]
-  avatarUrl   String?   @map("avatar_url")
-  payoutInfo  Json?     @map("payout_info")
-  userId      String?   @unique @map("user_id")
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz
-  createdBy   String?   @map("created_by")
-  updatedBy   String?   @map("updated_by")
-  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz
+  password         String?
+  name             String
+  furigana         String?
+  address          String?
+  affiliation      String?
+  specialties      String[]
+  avatarUrl        String?   @map("avatar_url")
+  bankAccountInfo  Json?     @map("bank_account_info")
+  userId           String?   @unique @map("user_id")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy        String?   @map("created_by")
+  updatedBy        String?   @map("updated_by")
+  deletedAt        DateTime? @map("deleted_at") @db.Timestamptz
 
   // Relations
   user            User?            @relation(fields: [userId], references: [id])
