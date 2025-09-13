@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { Home, User, BookOpen, Users, GraduationCap, BarChart3 } from 'lucide-react';
+import { Home, User, BookOpen, Users, GraduationCap, BarChart3, UserCheck } from 'lucide-react';
 
 interface NavigationItem {
   href: string;
@@ -81,6 +81,7 @@ export function Sidebar() {
         return [
           ...baseItems,
           { href: '/admin/users', label: 'ユーザー管理', icon: <BarChart3 className="h-5 w-5" /> },
+          { href: '/admin/matching', label: 'マッチング管理', icon: <UserCheck className="h-5 w-5" /> },
         ];
       default:
         return baseItems;
