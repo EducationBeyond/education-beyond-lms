@@ -37,3 +37,6 @@ next-env.d.ts
 
 # prisma generated files
 /generated/prisma
+
+# uploaded files
+/public/uploads

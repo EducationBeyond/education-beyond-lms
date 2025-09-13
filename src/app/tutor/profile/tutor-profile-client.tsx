@@ -12,8 +12,31 @@ interface TutorProfileClientProps {
 export function TutorProfileClient({ initialData }: TutorProfileClientProps) {
   const [avatarUrl, setAvatarUrl] = useState(initialData.avatarUrl);
 
-  const handleImageUpload = (imageUrl: string) => {
+  const handleImageUpload = async (imageUrl: string) => {
     setAvatarUrl(imageUrl);
+    
+    // 画像アップロード後に自動的にプロフィールを保存
+    try {
+      const response = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...initialData,
+          avatarUrl: imageUrl,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('プロフィール自動保存エラー:', error);
+      } else {
+        console.log('[Profile] Avatar URL automatically saved to database');
+      }
+    } catch (error) {
+      console.error('プロフィール自動保存エラー:', error);
+    }
   };
 
   const handleSubmit = async (data: any) => {

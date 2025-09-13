@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '../../../../auth';
+import { auth } from '@/auth';
+import { writeFile } from 'fs/promises';
+import path from 'path';
 
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();
     
-    if (!session?.user?.id) {
+    console.log('[API Upload] Session check:', { 
+      hasSession: !!session, 
+      userEmail: session?.user?.email,
+      userId: session?.user?.id 
+    });
+    
+    if (!session?.user?.email) {
+      console.log('[API Upload] Unauthorized: No session or email');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -26,38 +35,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid file type' }, { status: 400 });
     }
 
-    // TODO: 実際のSupabase Storage連携実装
-    // 現在はスタブとしてダミーURLを返す
-    // 実装時には以下の処理が必要：
-    // 1. Supabaseクライアントの初期化
-    // 2. ファイルのアップロード
-    // 3. 公開URLの取得
-    // 4. プロフィール画像URLをデータベースに保存
+    // 実際のファイル保存実装（開発環境用）
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
 
-    /*
-    import { createClient } from '@supabase/supabase-js';
+    // ファイル名を生成（ユーザーIDとタイムスタンプで一意にする）
+    const userId = session.user.email?.replace(/[@.]/g, '_') || session.user.id || 'anonymous';
+    const fileExtension = path.extname(file.name);
+    const fileName = `${userId}-${Date.now()}${fileExtension}`;
     
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
-    const fileName = `${session.user.id}-${Date.now()}-${file.name}`;
-    const { data, error } = await supabase.storage
-      .from('profile-images')
-      .upload(fileName, file);
-
-    if (error) {
-      return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
-    }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('profile-images')
-      .getPublicUrl(fileName);
-    */
-
-    // スタブ実装: ダミーURLを返す
-    const imageUrl = `/api/placeholder-image?user=${session.user.id}&timestamp=${Date.now()}`;
+    // public/uploads に保存
+    const uploadPath = path.join(process.cwd(), 'public', 'uploads', fileName);
+    await writeFile(uploadPath, buffer);
+    
+    // 公開URLを生成
+    const imageUrl = `/uploads/${fileName}`;
+    
+    console.log('[API Upload] File saved successfully:', {
+      fileName,
+      filePath: uploadPath,
+      imageUrl,
+      fileSize: buffer.length,
+      fileType: file.type
+    });
 
     return NextResponse.json({ imageUrl });
   } catch (error) {

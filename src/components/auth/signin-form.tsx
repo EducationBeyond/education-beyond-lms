@@ -235,14 +235,23 @@ export function SignInForm() {
         </Alert>
       )}
 
-      {/* Register Link */}
-      <div className="text-center">
-        <Link
-          href="/auth/register"
-          className="text-primary hover:underline text-sm"
-        >
-          新規アカウント作成はこちら
-        </Link>
+      {/* Register Links */}
+      <div className="text-center space-y-2">
+        <p className="text-sm text-gray-600">アカウントをお持ちでない方</p>
+        <div className="flex flex-col sm:flex-row gap-2 justify-center">
+          <Link
+            href="/register/student"
+            className="text-blue-600 hover:text-blue-500 text-sm border border-blue-600 hover:border-blue-500 px-4 py-2 rounded-md transition-colors"
+          >
+            学生登録
+          </Link>
+          <Link
+            href="/register/tutor"
+            className="text-green-600 hover:text-green-500 text-sm border border-green-600 hover:border-green-500 px-4 py-2 rounded-md transition-colors"
+          >
+            チューター登録
+          </Link>
+        </div>
       </div>
 
       <div className="text-center text-xs text-muted-foreground">

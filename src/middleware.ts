@@ -25,6 +25,10 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/api/user/role') ||
     pathname.startsWith('/api/profile') ||
     pathname.startsWith('/api/tutors') ||
+    pathname.startsWith('/api/register') ||
+    pathname.startsWith('/api/upload') ||
+    pathname.startsWith('/api/placeholder-image') ||
+    pathname.startsWith('/register') ||
     pathname === '/' ||
     pathname === '/login' ||
     pathname === '/auth/error'
