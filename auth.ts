@@ -4,6 +4,7 @@ import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import { compare } from "bcryptjs";
+import { getUserRole, getRoleRedirectPath } from "@/lib/user-role";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -34,14 +35,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
+  pages: {
+    signIn: '/login',
+  },
   callbacks: {
     async signIn({ account, profile }) {
       // 例: Google の email_verified 相当を確認していない場合は拒否…などを実装
       return true;
     },
     async session({ session, user }) {
-      if (user) (session as any).userId = user.id;
+      if (user) {
+        (session as any).userId = user.id;
+        // ユーザーのロールを取得してセッションに追加
+        if (user.email) {
+          const role = await getUserRole(user.email);
+          (session as any).userRole = role;
+        }
+      }
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      // デフォルトのリダイレクト処理
+      if (url.startsWith('/')) return new URL(url, baseUrl).toString();
+      if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
     },
   },
 });

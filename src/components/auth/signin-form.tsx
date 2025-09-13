@@ -1,7 +1,7 @@
 'use client';
 
-import { signIn } from 'next-auth/react';
-import { useSearchParams } from 'next/navigation';
+import { signIn, getSession } from 'next-auth/react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,7 @@ type LoginMethod = 'credentials' | 'google';
 
 export function SignInForm() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const callbackUrl = searchParams?.get('callbackUrl') || '/';
   const message = searchParams?.get('message');
   
@@ -26,6 +27,29 @@ export function SignInForm() {
   const [formData, setFormData] = useState<FormData>({ email: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleRoleBasedRedirect = async (email: string) => {
+    try {
+      const response = await fetch('/api/user/role', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        const { redirectPath } = await response.json();
+        router.push(redirectPath);
+      } else {
+        console.error('Role detection failed:', await response.text());
+        router.push('/');
+      }
+    } catch (error) {
+      console.error('Role redirect error:', error);
+      router.push('/');
+    }
+  };
 
   const handleCredentialsSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,8 +66,9 @@ export function SignInForm() {
 
       if (result?.error) {
         setError('メールアドレスまたはパスワードが正しくありません');
-      } else if (result?.url) {
-        window.location.href = result.url;
+      } else if (result?.ok) {
+        // 認証成功時はロール別リダイレクト
+        await handleRoleBasedRedirect(formData.email);
       }
     } catch (error) {
       console.error('Credentials sign in error:', error);
@@ -56,10 +81,22 @@ export function SignInForm() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-      await signIn('google', {
+      const result = await signIn('google', {
         callbackUrl,
-        redirect: true,
+        redirect: false,
       });
+      
+      if (result?.ok) {
+        // Google認証成功後、セッションを取得してロール別リダイレクト
+        const session = await getSession();
+        if (session?.user?.email) {
+          await handleRoleBasedRedirect(session.user.email);
+        } else {
+          router.push('/');
+        }
+      } else if (result?.error) {
+        setError('Googleログインに失敗しました');
+      }
     } catch (error) {
       console.error('Google sign in error:', error);
       setError('Googleログインに失敗しました');
