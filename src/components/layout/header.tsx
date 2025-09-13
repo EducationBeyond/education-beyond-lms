@@ -71,6 +71,43 @@ export function Header() {
                     >
                       ホーム
                     </Link>
+                    
+                    {/* Role-based profile links */}
+                    {session.user.role === 'STUDENT' && (
+                      <Link
+                        href="/profile/student"
+                        className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                      >
+                        プロフィール
+                      </Link>
+                    )}
+                    
+                    {session.user.role === 'PARENT' && (
+                      <Link
+                        href="/profile/parent"
+                        className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                      >
+                        プロフィール
+                      </Link>
+                    )}
+                    
+                    {session.user.role === 'TUTOR' && (
+                      <Link
+                        href="/profile/tutor"
+                        className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                      >
+                        プロフィール
+                      </Link>
+                    )}
+                    
+                    {session.user.role === 'ADMIN' && (
+                      <Link
+                        href="/admin/users"
+                        className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                      >
+                        ユーザー管理
+                      </Link>
+                    )}
                   </nav>
                 )}
 
