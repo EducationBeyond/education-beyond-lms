@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -15,7 +15,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const tutorId = params.id;
+    const { id: tutorId } = await params;
     console.log('[API Tutor Detail] Fetching tutor:', tutorId);
 
     // チューターの詳細情報を取得
@@ -33,6 +33,8 @@ export async function GET(
         specialties: true,
         avatarUrl: true,
         bankAccountInfo: true,
+        interviewCalendarUrl: true,
+        lessonCalendarUrl: true,
         createdAt: true,
         updatedAt: true,
       },

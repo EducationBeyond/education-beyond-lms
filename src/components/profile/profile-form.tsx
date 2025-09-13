@@ -37,6 +37,8 @@ export const tutorProfileSchema = z.object({
   specialties: z.array(z.string()).optional(),
   avatarUrl: z.string().optional(),
   bankAccountInfo: z.string().optional(),
+  interviewCalendarUrl: z.string().url('有効なURLを入力してください').optional().or(z.literal('')),
+  lessonCalendarUrl: z.string().url('有効なURLを入力してください').optional().or(z.literal('')),
 });
 
 interface ProfileFormProps {
@@ -309,6 +311,44 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
                       <FormControl>
                         <Textarea 
                           placeholder="銀行口座情報など"
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="interviewCalendarUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>事前面談用カレンダーURL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="url"
+                          placeholder="https://calendly.com/your-name/interview"
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="lessonCalendarUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>研究予約用カレンダーURL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="url"
+                          placeholder="https://calendly.com/your-name/lesson"
                           {...field}
                           value={field.value || ''}
                         />

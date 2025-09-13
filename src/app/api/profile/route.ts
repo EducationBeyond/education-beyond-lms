@@ -30,6 +30,8 @@ const tutorProfileSchema = z.object({
   specialties: z.array(z.string()).optional(),
   avatarUrl: z.string().optional().nullable(),
   bankAccountInfo: z.union([z.string(), z.object({}).passthrough()]).optional().nullable(),
+  interviewCalendarUrl: z.string().optional().nullable(),
+  lessonCalendarUrl: z.string().optional().nullable(),
 });
 
 export async function GET(request: NextRequest) {
@@ -149,6 +151,8 @@ export async function PUT(request: NextRequest) {
           specialties: validatedData.specialties || [],
           avatarUrl: validatedData.avatarUrl,
           bankAccountInfo: validatedData.bankAccountInfo,
+          interviewCalendarUrl: validatedData.interviewCalendarUrl,
+          lessonCalendarUrl: validatedData.lessonCalendarUrl,
         };
         
         console.log('[API Profile] Update data:', updateData);

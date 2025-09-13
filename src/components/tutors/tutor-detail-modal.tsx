@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, User, Mail, Building, MapPin, BookOpen, Calendar } from 'lucide-react';
+import { X, User, Mail, Building, MapPin, BookOpen, Calendar, ExternalLink } from 'lucide-react';
 
 interface Tutor {
   id: string;
@@ -12,6 +12,8 @@ interface Tutor {
   address?: string;
   specialties: string[];
   avatarUrl?: string;
+  interviewCalendarUrl?: string;
+  lessonCalendarUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -203,7 +205,33 @@ export function TutorDetailModal({ tutorId, isOpen, onClose }: TutorDetailModalP
           </div>
 
           {/* Footer */}
-          <div className="flex justify-end p-6 border-t border-gray-200">
+          <div className="flex justify-between items-center p-6 border-t border-gray-200">
+            {tutor && (tutor.interviewCalendarUrl || tutor.lessonCalendarUrl) ? (
+              <div className="flex space-x-3">
+                {tutor.interviewCalendarUrl && (
+                  <button
+                    onClick={() => window.open(tutor.interviewCalendarUrl, '_blank')}
+                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    <Calendar className="h-4 w-4 mr-2" />
+                    事前面談を予約
+                    <ExternalLink className="h-4 w-4 ml-2" />
+                  </button>
+                )}
+                {tutor.lessonCalendarUrl && (
+                  <button
+                    onClick={() => window.open(tutor.lessonCalendarUrl, '_blank')}
+                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                  >
+                    <Calendar className="h-4 w-4 mr-2" />
+                    研究予約
+                    <ExternalLink className="h-4 w-4 ml-2" />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div></div>
+            )}
             <button
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"

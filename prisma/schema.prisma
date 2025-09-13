@@ -151,6 +151,8 @@ model Tutor {
   specialties      String[]
   avatarUrl        String?   @map("avatar_url")
   bankAccountInfo  Json?     @map("bank_account_info")
+  interviewCalendarUrl String? @map("interview_calendar_url") // 事前面談用カレンダー
+  lessonCalendarUrl String?   @map("lesson_calendar_url")    // 研究予約用カレンダー
   userId           String?   @unique @map("user_id")
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz
