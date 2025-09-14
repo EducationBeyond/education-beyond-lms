@@ -5,11 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+// Dialog コンポーネントがないため削除
+import { Mail, AlertCircle, CheckCircle } from 'lucide-react';
 
 interface User {
   id: string;
   name: string;
-  email: string;
+  email: string | null; // 学生の場合はnullの可能性
   role: 'STUDENT' | 'PARENT' | 'TUTOR' | 'ADMIN';
   createdAt: string;
   parent?: { name: string };
@@ -22,6 +26,13 @@ export function AdminUsersClient() {
   const [filteredRole, setFilteredRole] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Googleアカウント紐づけフォーム用の状態
+  const [linkingStudentId, setLinkingStudentId] = useState<string | null>(null);
+  const [linkEmail, setLinkEmail] = useState('');
+  const [linkPassword, setLinkPassword] = useState('');
+  const [linkLoading, setLinkLoading] = useState(false);
+  const [linkSuccess, setLinkSuccess] = useState<string | null>(null);
 
   const fetchUsers = async (role: string = 'all') => {
     try {
@@ -45,6 +56,67 @@ export function AdminUsersClient() {
   useEffect(() => {
     fetchUsers(filteredRole);
   }, [filteredRole]);
+
+  // Googleアカウント紐づけ処理
+  const handleLinkGoogleAccount = async (studentId: string) => {
+    if (!linkEmail || !linkPassword) return;
+
+    setLinkLoading(true);
+    setError(null);
+    setLinkSuccess(null);
+
+    try {
+      const response = await fetch(`/api/admin/students/${studentId}/link-google`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: linkEmail,
+          password: linkPassword,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setLinkSuccess(result.message);
+        // ユーザーリストを再取得
+        await fetchUsers(filteredRole);
+        // フォームをリセット
+        setTimeout(() => {
+          setLinkingStudentId(null);
+          setLinkEmail('');
+          setLinkPassword('');
+          setLinkSuccess(null);
+        }, 2000);
+      } else {
+        setError(result.error || 'Googleアカウントの紐づけに失敗しました');
+      }
+    } catch (err) {
+      setError('ネットワークエラーが発生しました');
+    } finally {
+      setLinkLoading(false);
+    }
+  };
+
+  // フォームを開く処理
+  const openLinkForm = (studentId: string) => {
+    setLinkingStudentId(studentId);
+    setLinkEmail('');
+    setLinkPassword('');
+    setError(null);
+    setLinkSuccess(null);
+  };
+
+  // フォームをキャンセルする処理
+  const cancelLinkForm = () => {
+    setLinkingStudentId(null);
+    setLinkEmail('');
+    setLinkPassword('');
+    setError(null);
+    setLinkSuccess(null);
+  };
 
   const getRoleName = (role: string) => {
     switch (role) {
@@ -77,6 +149,7 @@ export function AdminUsersClient() {
             <SelectContent>
               <SelectItem value="all">すべてのユーザー</SelectItem>
               <SelectItem value="STUDENT">学生</SelectItem>
+              <SelectItem value="STUDENT_UNLINKED">未紐づけ学生</SelectItem>
               <SelectItem value="PARENT">保護者</SelectItem>
               <SelectItem value="TUTOR">チューター</SelectItem>
               <SelectItem value="ADMIN">管理者</SelectItem>
@@ -105,9 +178,26 @@ export function AdminUsersClient() {
             <Card key={user.id}>
               <CardHeader>
                 <div className="flex justify-between items-start">
-                  <div>
+                  <div className="flex-1">
                     <CardTitle className="text-lg">{user.name}</CardTitle>
-                    <CardDescription>{user.email}</CardDescription>
+                    <CardDescription>
+                      {user.email || (user.role === 'STUDENT' ? '未設定' : '不明')}
+                    </CardDescription>
+                    {user.role === 'STUDENT' && (
+                      <div className="flex items-center gap-1 mt-1">
+                        {user.email ? (
+                          <>
+                            <CheckCircle className="h-3 w-3 text-green-500" />
+                            <span className="text-xs text-green-600">Googleアカウント紐づけ済</span>
+                          </>
+                        ) : (
+                          <>
+                            <AlertCircle className="h-3 w-3 text-orange-500" />
+                            <span className="text-xs text-orange-600">Googleアカウント未設定</span>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <span className={`px-2 py-1 text-xs rounded-full ${getRoleColor(user.role)}`}>
                     {getRoleName(user.role)}
@@ -142,6 +232,88 @@ export function AdminUsersClient() {
                     </p>
                   )}
                 </div>
+
+                {/* 学生でGoogleアカウント未設定の場合のみボタン/フォーム表示 */}
+                {user.role === 'STUDENT' && !user.email && (
+                  <div className="mt-4 pt-4 border-t">
+                    {linkingStudentId === user.id ? (
+                      // 紐づけフォーム
+                      <div className="space-y-3">
+                        <h4 className="font-medium text-sm">Googleアカウントを紐づける</h4>
+
+                        {error && (
+                          <Alert variant="destructive">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription className="text-xs">{error}</AlertDescription>
+                          </Alert>
+                        )}
+
+                        {linkSuccess && (
+                          <Alert>
+                            <CheckCircle className="h-4 w-4" />
+                            <AlertDescription className="text-xs text-green-700">{linkSuccess}</AlertDescription>
+                          </Alert>
+                        )}
+
+                        <div className="space-y-2">
+                          <Label htmlFor={`link-email-${user.id}`} className="text-xs">Googleメールアドレス</Label>
+                          <Input
+                            id={`link-email-${user.id}`}
+                            type="email"
+                            placeholder="student@example.com"
+                            value={linkEmail}
+                            onChange={(e) => setLinkEmail(e.target.value)}
+                            disabled={linkLoading || !!linkSuccess}
+                            className="h-8 text-xs"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor={`link-password-${user.id}`} className="text-xs">パスワード</Label>
+                          <Input
+                            id={`link-password-${user.id}`}
+                            type="password"
+                            placeholder="8文字以上"
+                            value={linkPassword}
+                            onChange={(e) => setLinkPassword(e.target.value)}
+                            disabled={linkLoading || !!linkSuccess}
+                            className="h-8 text-xs"
+                          />
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => handleLinkGoogleAccount(user.id)}
+                            disabled={linkLoading || !linkEmail || !linkPassword || !!linkSuccess}
+                            className="flex-1 h-8 text-xs"
+                          >
+                            {linkLoading ? '紐づけ中...' : '紐づける'}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={cancelLinkForm}
+                            disabled={linkLoading}
+                            className="h-8 text-xs"
+                          >
+                            キャンセル
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      // 紐づけボタン
+                      <Button
+                        size="sm"
+                        onClick={() => openLinkForm(user.id)}
+                        className="w-full h-8 text-xs"
+                      >
+                        <Mail className="h-3 w-3 mr-2" />
+                        Googleアカウントを紐づける
+                      </Button>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}

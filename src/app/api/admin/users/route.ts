@@ -82,6 +82,22 @@ export async function GET(request: NextRequest) {
           });
           users = students.map(s => ({ ...s, role: 'STUDENT' }));
           break;
+        case 'STUDENT_UNLINKED':
+          // Googleアカウント未紐づけの学生のみ取得
+          const unlinkedStudents = await prisma.student.findMany({
+            where: {
+              email: null // メールアドレスが設定されていない学生
+            },
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              createdAt: true,
+              parent: { select: { name: true } }
+            }
+          });
+          users = unlinkedStudents.map(s => ({ ...s, role: 'STUDENT' }));
+          break;
         case 'PARENT':
           const parents = await prisma.parent.findMany({
             select: {

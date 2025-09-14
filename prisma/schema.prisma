@@ -107,7 +107,7 @@ model Parent {
 
 model Student {
   id               String    @id @default(cuid())
-  email            String    @unique @db.Citext
+  email            String?   @db.Citext // Optional: 運営側で後から設定
   /// DEPRECATED: 認証は users.password_hash へ集約予定
   password         String?
   name             String
@@ -133,7 +133,7 @@ model Student {
   reservations    Reservation[]
   pairings        Pairing[]
 
-  @@index([email])
+  @@unique([email]) // null値は除外してユニーク制約
   @@index([parentId])
   @@index([deletedAt])
   @@map("students")
