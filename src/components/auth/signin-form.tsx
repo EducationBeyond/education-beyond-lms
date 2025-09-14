@@ -43,19 +43,36 @@ export function SignInForm() {
         const { redirectPath } = await response.json();
         console.log(`[SignInForm] Role API returned redirectPath: ${redirectPath}`);
         console.log(`[SignInForm] About to call router.push(${redirectPath})`);
-        
+
         // 即座にリダイレクト
         window.location.href = redirectPath;
       } else {
-        const errorText = await response.text();
-        console.error('[SignInForm] Role detection failed:', errorText);
-        console.log('[SignInForm] Falling back to callbackUrl:', callbackUrl);
-        window.location.href = callbackUrl;
+        const errorData = await response.json();
+        console.error('[SignInForm] Role detection failed:', errorData);
+
+        if (response.status === 422 && errorData.userExists) {
+          // ユーザーは存在するがロールが未割り当て
+          console.log('[SignInForm] User exists but role not assigned');
+          setError(`アカウント「${errorData.user?.email}」のロールが設定されていません。管理者にお問い合わせください。`);
+          setIsLoading(false);
+          return;
+        } else if (response.status === 404 && !errorData.userExists) {
+          // ユーザーが存在しない
+          console.log('[SignInForm] User does not exist');
+          setError('ログインに失敗しました。アカウントが存在しません。');
+          setIsLoading(false);
+          return;
+        } else {
+          // その他のエラー
+          console.log('[SignInForm] Other error, falling back to callbackUrl:', callbackUrl);
+          window.location.href = callbackUrl;
+        }
       }
     } catch (error) {
       console.error('[SignInForm] Role redirect error:', error);
       console.log('[SignInForm] Falling back to callbackUrl:', callbackUrl);
-      window.location.href = callbackUrl;
+      setError('ログイン処理でエラーが発生しました。');
+      setIsLoading(false);
     }
   };
 
@@ -93,35 +110,22 @@ export function SignInForm() {
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
+    setError(null);
+
     try {
       console.log('[SignInForm] Starting Google sign in...');
-      const result = await signIn('google', {
-        callbackUrl,
-        redirect: false,
+      console.log('[SignInForm] Callback URL:', callbackUrl);
+
+      // Google認証はブラウザリダイレクトで処理
+      await signIn('google', {
+        callbackUrl: callbackUrl,
       });
-      
-      console.log('[SignInForm] Google signIn result:', result);
-      
-      if (result?.ok) {
-        // Google認証成功後、セッションを取得してロール別リダイレクト
-        console.log('[SignInForm] Google auth successful, getting session...');
-        const session = await getSession();
-        console.log('[SignInForm] Session obtained:', session);
-        
-        if (session?.user?.email) {
-          await handleRoleBasedRedirect(session.user.email);
-        } else {
-          console.log('[SignInForm] No email in session, redirecting to homepage');
-          window.location.href = '/';
-        }
-      } else if (result?.error) {
-        console.error('[SignInForm] Google auth error:', result.error);
-        setError('Googleログインに失敗しました');
-      }
+
+      // この時点ではリダイレクトされるため、以下のコードは通常実行されない
+      console.log('[SignInForm] signIn completed (should not reach here)');
     } catch (error) {
       console.error('[SignInForm] Google sign in error:', error);
-      setError('Googleログインに失敗しました');
-    } finally {
+      setError('Googleログインでエラーが発生しました。');
       setIsLoading(false);
     }
   };

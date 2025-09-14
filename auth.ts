@@ -10,6 +10,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   secret: process.env.AUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development',
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -62,10 +63,31 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // デフォルトのリダイレクト処理
-      if (url.startsWith('/')) return new URL(url, baseUrl).toString();
-      if (new URL(url).origin === baseUrl) return url;
-      return baseUrl;
+      console.log('[NextAuth] Redirect callback:', { url, baseUrl });
+
+      // 内部URLの場合（callbackUrlが指定されている場合）
+      if (url.startsWith('/') && url !== '/login') {
+        console.log('[NextAuth] Internal URL redirect:', url);
+        return new URL(url, baseUrl).toString();
+      }
+
+      if (new URL(url).origin === baseUrl) {
+        console.log('[NextAuth] Same origin redirect:', url);
+        return url;
+      }
+
+      // OAuth経由でのログイン後は post-login ページでロール判定
+      console.log('[NextAuth] OAuth login, redirecting to post-login page');
+      const postLoginUrl = new URL('/auth/post-login', baseUrl);
+
+      // 元のcallbackUrlがあれば保持
+      const originalUrl = new URL(url);
+      const callbackUrl = originalUrl.searchParams.get('callbackUrl');
+      if (callbackUrl) {
+        postLoginUrl.searchParams.set('callbackUrl', callbackUrl);
+      }
+
+      return postLoginUrl.toString();
     },
   },
 });
