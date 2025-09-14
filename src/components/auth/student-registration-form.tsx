@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckboxTagInput } from '@/components/ui/tag-input';
 import { Eye, EyeOff, User, Mail, Lock, Calendar, MapPin, Heart, UserCheck } from 'lucide-react';
 
 const studentRegistrationSchema = z.object({
@@ -71,6 +72,7 @@ export function StudentRegistrationForm() {
     formState: { errors },
     setError,
     watch,
+    setValue,
   } = useForm<StudentRegistrationForm>({
     resolver: zodResolver(studentRegistrationSchema),
   });
@@ -341,37 +343,25 @@ export function StudentRegistrationForm() {
                 <Heart className="h-5 w-5" />
                 興味のある分野（任意）
               </h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                {interestOptions.map((interest) => (
-                  <label key={interest.value} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      value={interest.value}
-                      {...register('interests')}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">{interest.label}</span>
-                  </label>
-                ))}
-              </div>
+              <CheckboxTagInput
+                value={watchedInterests}
+                onChange={(interests) => setValue('interests', interests)}
+                options={interestOptions}
+                allowCustomTags={true}
+                placeholder="カスタム分野を追加..."
+              />
             </div>
 
             {/* Gifted Traits */}
             <div className="space-y-4 border-t pt-6">
               <h3 className="text-lg font-medium">ギフテッド特性（任意）</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                {giftedTraitsOptions.map((trait) => (
-                  <label key={trait} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      value={trait}
-                      {...register('giftedTraits')}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">{trait}</span>
-                  </label>
-                ))}
-              </div>
+              <CheckboxTagInput
+                value={watchedGiftedTraits}
+                onChange={(traits) => setValue('giftedTraits', traits)}
+                options={giftedTraitsOptions.map(trait => ({ value: trait, label: trait }))}
+                allowCustomTags={true}
+                placeholder="カスタム特性を追加..."
+              />
             </div>
 
             {/* Special Notes */}

@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckboxTagInput } from '@/components/ui/tag-input';
 import { Eye, EyeOff, User, Mail, Lock, Building, MapPin, BookOpen, CreditCard } from 'lucide-react';
 
 const tutorRegistrationSchema = z.object({
@@ -52,6 +53,7 @@ export function TutorRegistrationForm() {
     formState: { errors },
     setError,
     watch,
+    setValue,
   } = useForm<TutorRegistrationForm>({
     resolver: zodResolver(tutorRegistrationSchema),
   });
@@ -259,19 +261,13 @@ export function TutorRegistrationForm() {
                 専門分野（任意）
               </h3>
               <p className="text-sm text-gray-600">指導できる科目を選択してください</p>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                {specialtyOptions.map((specialty) => (
-                  <label key={specialty.value} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      value={specialty.value}
-                      {...register('specialties')}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">{specialty.label}</span>
-                  </label>
-                ))}
-              </div>
+              <CheckboxTagInput
+                value={watchedSpecialties}
+                onChange={(specialties) => setValue('specialties', specialties)}
+                options={specialtyOptions}
+                allowCustomTags={true}
+                placeholder="カスタム科目を追加..."
+              />
             </div>
 
             {/* Bank Account Information */}

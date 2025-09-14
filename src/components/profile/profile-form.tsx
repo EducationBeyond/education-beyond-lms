@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { TagInput } from '@/components/ui/tag-input';
 
 export const studentProfileSchema = z.object({
   name: z.string().min(1, '名前は必須です'),
@@ -99,13 +100,6 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
     }
   };
 
-  const formatInterestsArray = (interests: string) => {
-    return interests.split(',').map(s => s.trim()).filter(Boolean);
-  };
-
-  const formatSpecialtiesArray = (specialties: string) => {
-    return specialties.split(',').map(s => s.trim()).filter(Boolean);
-  };
 
   return (
     <Card>
@@ -225,31 +219,43 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
                   )}
                 />
 
-                <div className="space-y-2">
-                  <Label htmlFor="giftedTraits">ギフテッド特性（カンマ区切り）</Label>
-                  <Input
-                    id="giftedTraits"
-                    placeholder="記憶力, 論理的思考, 創造性"
-                    defaultValue={initialData?.giftedTraits?.join(', ') || ''}
-                    onChange={(e) => {
-                      const giftedTraits = formatInterestsArray(e.target.value);
-                      form.setValue('giftedTraits', giftedTraits);
-                    }}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="giftedTraits"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>ギフテッド特性</FormLabel>
+                      <FormControl>
+                        <TagInput
+                          value={field.value || []}
+                          onChange={field.onChange}
+                          placeholder="特性を追加..."
+                          suggestions={['記憶力', '集中力', '論理的思考力', '創造性', '言語能力', '数学的能力', '芸術的才能', 'リーダーシップ']}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                <div className="space-y-2">
-                  <Label htmlFor="interests">興味分野（カンマ区切り）</Label>
-                  <Input
-                    id="interests"
-                    placeholder="数学, 英語, プログラミング"
-                    defaultValue={initialData?.interests?.join(', ') || ''}
-                    onChange={(e) => {
-                      const interests = formatInterestsArray(e.target.value);
-                      form.setValue('interests', interests);
-                    }}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="interests"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>興味分野</FormLabel>
+                      <FormControl>
+                        <TagInput
+                          value={field.value || []}
+                          onChange={field.onChange}
+                          placeholder="興味のある分野を追加..."
+                          suggestions={['数学', '英語', '理科', '国語', '社会', '物理', '化学', '生物', '歴史', '地理', 'プログラミング', '美術', '音楽']}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                   control={form.control}
@@ -289,18 +295,24 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
                 />
 
 
-                <div className="space-y-2">
-                  <Label htmlFor="specialties">専門分野（カンマ区切り）</Label>
-                  <Input
-                    id="specialties"
-                    placeholder="数学, 物理, 化学"
-                    defaultValue={initialData?.specialties?.join(', ') || ''}
-                    onChange={(e) => {
-                      const specialties = formatSpecialtiesArray(e.target.value);
-                      form.setValue('specialties', specialties);
-                    }}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="specialties"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>専門分野</FormLabel>
+                      <FormControl>
+                        <TagInput
+                          value={field.value || []}
+                          onChange={field.onChange}
+                          placeholder="専門分野を追加..."
+                          suggestions={['数学', '英語', '理科', '国語', '社会', '物理', '化学', '生物', '歴史', '地理', 'プログラミング', '統計学', '経済学']}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                   control={form.control}
