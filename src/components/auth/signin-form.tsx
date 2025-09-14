@@ -2,7 +2,7 @@
 
 import { signIn, getSession } from 'next-auth/react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -22,11 +22,36 @@ export function SignInForm() {
   const router = useRouter();
   const callbackUrl = searchParams?.get('callbackUrl') || '/';
   const message = searchParams?.get('message');
-  
+  const authError = searchParams?.get('error'); // NextAuth error parameter
+
   const [loginMethod, setLoginMethod] = useState<LoginMethod>('credentials');
   const [formData, setFormData] = useState<FormData>({ email: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // NextAuth のエラーパラメータをチェック
+  useEffect(() => {
+    if (authError) {
+      console.log('[SignInForm] NextAuth error detected:', authError);
+      switch (authError) {
+        case 'Signin':
+        case 'OAuthSignin':
+        case 'OAuthCallback':
+        case 'OAuthCreateAccount':
+        case 'EmailCreateAccount':
+        case 'Callback':
+        case 'OAuthAccountNotLinked':
+        case 'EmailSignin':
+        case 'CredentialsSignin':
+        case 'SessionRequired':
+          setError('指定されたメールアドレスが見つかりません。管理者にお問い合わせください。');
+          setLoginMethod('google'); // Google login tab to show error
+          break;
+        default:
+          setError('ログインでエラーが発生しました。再度お試しください。');
+      }
+    }
+  }, [authError]);
 
   const handleRoleBasedRedirect = async (email: string) => {
     try {

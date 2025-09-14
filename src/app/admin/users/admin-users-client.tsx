@@ -30,7 +30,6 @@ export function AdminUsersClient() {
   // Googleアカウント紐づけフォーム用の状態
   const [linkingStudentId, setLinkingStudentId] = useState<string | null>(null);
   const [linkEmail, setLinkEmail] = useState('');
-  const [linkPassword, setLinkPassword] = useState('');
   const [linkLoading, setLinkLoading] = useState(false);
   const [linkSuccess, setLinkSuccess] = useState<string | null>(null);
 
@@ -57,9 +56,9 @@ export function AdminUsersClient() {
     fetchUsers(filteredRole);
   }, [filteredRole]);
 
-  // Googleアカウント紐づけ処理
+  // Googleメールアドレス設定処理
   const handleLinkGoogleAccount = async (studentId: string) => {
-    if (!linkEmail || !linkPassword) return;
+    if (!linkEmail) return;
 
     setLinkLoading(true);
     setError(null);
@@ -73,7 +72,6 @@ export function AdminUsersClient() {
         },
         body: JSON.stringify({
           email: linkEmail,
-          password: linkPassword,
         }),
       });
 
@@ -87,11 +85,10 @@ export function AdminUsersClient() {
         setTimeout(() => {
           setLinkingStudentId(null);
           setLinkEmail('');
-          setLinkPassword('');
           setLinkSuccess(null);
         }, 2000);
       } else {
-        setError(result.error || 'Googleアカウントの紐づけに失敗しました');
+        setError(result.error || 'Googleメールアドレスの設定に失敗しました');
       }
     } catch (err) {
       setError('ネットワークエラーが発生しました');
@@ -104,7 +101,6 @@ export function AdminUsersClient() {
   const openLinkForm = (studentId: string) => {
     setLinkingStudentId(studentId);
     setLinkEmail('');
-    setLinkPassword('');
     setError(null);
     setLinkSuccess(null);
   };
@@ -113,7 +109,6 @@ export function AdminUsersClient() {
   const cancelLinkForm = () => {
     setLinkingStudentId(null);
     setLinkEmail('');
-    setLinkPassword('');
     setError(null);
     setLinkSuccess(null);
   };
@@ -260,35 +255,25 @@ export function AdminUsersClient() {
                           <Input
                             id={`link-email-${user.id}`}
                             type="email"
-                            placeholder="student@example.com"
+                            placeholder="student@gmail.com"
                             value={linkEmail}
                             onChange={(e) => setLinkEmail(e.target.value)}
                             disabled={linkLoading || !!linkSuccess}
                             className="h-8 text-xs"
                           />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor={`link-password-${user.id}`} className="text-xs">パスワード</Label>
-                          <Input
-                            id={`link-password-${user.id}`}
-                            type="password"
-                            placeholder="8文字以上"
-                            value={linkPassword}
-                            onChange={(e) => setLinkPassword(e.target.value)}
-                            disabled={linkLoading || !!linkSuccess}
-                            className="h-8 text-xs"
-                          />
+                          <p className="text-xs text-muted-foreground">
+                            ※ 学生本人がこのメールアドレスでGoogle OAuthログインを行います
+                          </p>
                         </div>
 
                         <div className="flex gap-2">
                           <Button
                             size="sm"
                             onClick={() => handleLinkGoogleAccount(user.id)}
-                            disabled={linkLoading || !linkEmail || !linkPassword || !!linkSuccess}
+                            disabled={linkLoading || !linkEmail || !!linkSuccess}
                             className="flex-1 h-8 text-xs"
                           >
-                            {linkLoading ? '紐づけ中...' : '紐づける'}
+                            {linkLoading ? 'メール設定中...' : 'メールアドレスを設定'}
                           </Button>
                           <Button
                             size="sm"

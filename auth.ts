@@ -15,8 +15,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      // 自動リンクは危険。必要なら signIn コールバックで厳格判定して手動リンク運用を基本に。
-      // allowDangerousEmailAccountLinking: false,
+      allowDangerousEmailAccountLinking: false, // 自動アカウントリンクを無効化
     }),
     Credentials({
       name: "credentials",
@@ -38,10 +37,35 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   pages: {
     signIn: '/login',
+    error: '/login', // エラー時もログインページにリダイレクト
   },
   callbacks: {
-    async signIn({ account, profile }) {
-      // 例: Google の email_verified 相当を確認していない場合は拒否…などを実装
+    async signIn({ account, profile, user }) {
+      // Google OAuthの場合のみ特別な処理を行う
+      if (account?.provider === 'google' && profile?.email) {
+        console.log('[NextAuth] Google OAuth sign in attempt for:', profile.email);
+
+        // Google OAuthでは既存ユーザーとの連携のみ許可
+        // 新規ユーザー作成は許可しない
+        const existingUser = await prisma.user.findUnique({
+          where: { email: profile.email },
+        });
+
+        if (!existingUser) {
+          // 既存ユーザーが見つからない場合は認証を拒否
+          console.log('[NextAuth] User not found in database, rejecting sign in:', profile.email);
+          // NextAuthは特定のエラーメッセージを表示する機能がないため、
+          // サインインを拒否し、クライアント側でエラーハンドリングを行う
+          return false;
+        }
+
+        console.log('[NextAuth] Existing user found, allowing sign in:', profile.email);
+
+        // 既存ユーザーが見つかった場合は、Google認証情報を連携
+        return true;
+      }
+
+      // その他の認証プロバイダー（credentials等）は従来通り
       return true;
     },
     async jwt({ token, user }) {

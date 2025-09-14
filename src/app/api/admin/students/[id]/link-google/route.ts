@@ -1,26 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
-import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-// 学生にGoogleアカウントを紐づけるスキーマ
-const linkGoogleAccountSchema = z.object({
+// 学生にGoogleメールアドレスを設定するスキーマ
+const setGoogleEmailSchema = z.object({
   email: z.string().email('有効なGoogleメールアドレスを入力してください'),
-  password: z.string().min(8, 'パスワードは8文字以上で入力してください'),
 });
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const studentId = params.id;
+    const { id: studentId } = await params;
     const body = await request.json();
-    const validatedData = linkGoogleAccountSchema.parse(body);
+    const validatedData = setGoogleEmailSchema.parse(body);
 
-    const { email, password } = validatedData;
+    const { email } = validatedData;
 
     // 学生の存在確認
     const existingStudent = await prisma.student.findUnique({
@@ -38,7 +36,7 @@ export async function PATCH(
     // 既にメールアドレスが設定されている場合はエラー
     if (existingStudent.email) {
       return NextResponse.json(
-        { error: 'この学生には既にGoogleアカウントが紐づけられています' },
+        { error: 'この学生には既にGoogleメールアドレスが設定されています' },
         { status: 409 }
       );
     }
@@ -52,17 +50,23 @@ export async function PATCH(
       );
     }
 
-    // パスワードハッシュ化
-    const hashedPassword = await bcrypt.hash(password, 12);
-
-    // トランザクションで学生情報を更新
+    // トランザクションで学生のメールアドレス設定とUserレコード作成を同時実行
     const updatedStudent = await prisma.$transaction(async (tx) => {
-      // 1. 学生のメールアドレスとパスワードを設定
+      // 1. Userテーブルにレコードを作成
+      const user = await tx.user.create({
+        data: {
+          email: email,
+          name: existingStudent.name,
+          emailVerified: new Date(), // Google OAuth用に認証済みにする
+        },
+      });
+
+      // 2. StudentテーブルにメールアドレスとUserIDを設定
       const student = await tx.student.update({
         where: { id: studentId },
         data: {
           email: email,
-          password: hashedPassword,
+          userId: user.id,
           updatedAt: new Date(),
         },
         include: {
@@ -76,9 +80,6 @@ export async function PATCH(
         }
       });
 
-      // 2. 必要に応じて User テーブルにも作成（NextAuth用）
-      // 現在はLegacy認証方式なので、将来的に移行する際に使用
-
       return student;
     });
 
@@ -90,7 +91,7 @@ export async function PATCH(
         email: updatedStudent.email,
         parent: updatedStudent.parent,
       },
-      message: `学生「${updatedStudent.name}」にGoogleアカウント「${email}」を紐づけました`,
+      message: `学生「${updatedStudent.name}」のGoogleメールアドレス「${email}」を設定しました。学生本人がGoogle OAuthでログインできるようになりました。`,
     });
 
   } catch (error) {
@@ -110,7 +111,7 @@ export async function PATCH(
     }
 
     return NextResponse.json(
-      { error: 'Googleアカウントの紐づけ処理中にエラーが発生しました' },
+      { error: 'Googleメールアドレスの設定処理中にエラーが発生しました' },
       { status: 500 }
     );
   } finally {
@@ -121,14 +122,15 @@ export async function PATCH(
 // メールアドレス重複チェックのヘルパー関数
 async function checkEmailExists(email: string): Promise<boolean> {
   try {
-    const [student, parent, tutor, admin] = await Promise.all([
+    const [user, student, parent, tutor, admin] = await Promise.all([
+      prisma.user.findUnique({ where: { email } }),
       prisma.student.findUnique({ where: { email } }),
       prisma.parent.findUnique({ where: { email } }),
       prisma.tutor.findUnique({ where: { email } }),
       prisma.admin.findUnique({ where: { email } }),
     ]);
 
-    return !!(student || parent || tutor || admin);
+    return !!(user || student || parent || tutor || admin);
   } catch (error) {
     console.error('Error checking email existence:', error);
     return false;
