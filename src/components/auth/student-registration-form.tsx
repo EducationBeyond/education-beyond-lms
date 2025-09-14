@@ -8,12 +8,17 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Eye, EyeOff, User, Mail, Lock, Calendar, MapPin, Heart } from 'lucide-react';
+import { Eye, EyeOff, User, Mail, Lock, Calendar, MapPin, Heart, UserCheck } from 'lucide-react';
 
 const studentRegistrationSchema = z.object({
-  email: z.string().email('有効なメールアドレスを入力してください'),
-  password: z.string().min(8, 'パスワードは8文字以上で入力してください'),
-  confirmPassword: z.string().min(8, 'パスワードを再入力してください'),
+  // 保護者情報
+  parentEmail: z.string().email('有効なメールアドレスを入力してください'),
+  parentPassword: z.string().min(8, 'パスワードは8文字以上で入力してください'),
+  parentConfirmPassword: z.string().min(8, 'パスワードを再入力してください'),
+  parentName: z.string().min(1, '保護者名は必須です'),
+  parentAddress: z.string().optional(),
+
+  // 学生情報（メールアドレスとパスワードは運営側で後から設定）
   name: z.string().min(1, '名前は必須です'),
   furigana: z.string().optional(),
   address: z.string().optional(),
@@ -22,9 +27,10 @@ const studentRegistrationSchema = z.object({
   interests: z.array(z.string()).optional(),
   giftedTraits: z.array(z.string()).optional(),
   cautions: z.string().optional(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'パスワードが一致しません',
-  path: ['confirmPassword'],
+})
+.refine((data) => data.parentPassword === data.parentConfirmPassword, {
+  message: '保護者のパスワードが一致しません',
+  path: ['parentConfirmPassword'],
 });
 
 type StudentRegistrationForm = z.infer<typeof studentRegistrationSchema>;
@@ -55,8 +61,8 @@ const giftedTraitsOptions = [
 
 export function StudentRegistrationForm() {
   const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showParentPassword, setShowParentPassword] = useState(false);
+  const [showParentConfirmPassword, setShowParentConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -76,9 +82,27 @@ export function StudentRegistrationForm() {
     setIsSubmitting(true);
 
     try {
-      const { confirmPassword, ...submitData } = data;
-      
-      const response = await fetch('/api/register/student', {
+      const {
+        parentConfirmPassword,
+        parentEmail,
+        parentPassword,
+        parentName,
+        parentAddress,
+        ...studentData
+      } = data;
+
+      // 保護者と学生の両方の情報を含むペイロード
+      const submitData = {
+        parent: {
+          email: parentEmail,
+          password: parentPassword,
+          name: parentName,
+          address: parentAddress || undefined,
+        },
+        student: studentData,
+      };
+
+      const response = await fetch('/api/register/student-with-parent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(submitData),
@@ -87,12 +111,14 @@ export function StudentRegistrationForm() {
       const result = await response.json();
 
       if (response.ok) {
-        alert('学生アカウントが正常に作成されました！ログインページに移動します。');
-        router.push('/login');
+        router.push('/register/student/success');
       } else {
         if (result.details && Array.isArray(result.details)) {
           result.details.forEach((detail: any) => {
-            setError(detail.path[0] as keyof StudentRegistrationForm, {
+            const fieldPath = detail.path.join('.');
+            // parent.email -> parentEmail のようにマッピング
+            const mappedPath = fieldPath.replace('parent.', 'parent').replace('student.', '') as keyof StudentRegistrationForm;
+            setError(mappedPath, {
               message: detail.message,
             });
           });
@@ -114,37 +140,129 @@ export function StudentRegistrationForm() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">学生アカウント登録</CardTitle>
           <p className="text-sm text-gray-600 text-center">
-            学習を始めるためのアカウントを作成しましょう
+            保護者と学生の情報を入力して、学習を始めるためのアカウントを作成しましょう
           </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Basic Information */}
+            {/* Parent Information */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium flex items-center gap-2">
-                <User className="h-5 w-5" />
-                基本情報
+                <UserCheck className="h-5 w-5" />
+                保護者情報
               </h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    メールアドレス*
+                    保護者メールアドレス*
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <input
-                      {...register('email')}
+                      {...register('parentEmail')}
                       type="email"
                       className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="student@example.com"
+                      placeholder="parent@example.com"
                     />
                   </div>
-                  {errors.email && (
-                    <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>
+                  {errors.parentEmail && (
+                    <p className="text-sm text-red-600 mt-1">{errors.parentEmail.message}</p>
                   )}
                 </div>
 
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    保護者名*
+                  </label>
+                  <input
+                    {...register('parentName')}
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="山田花子"
+                  />
+                  {errors.parentName && (
+                    <p className="text-sm text-red-600 mt-1">{errors.parentName.message}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    保護者パスワード*
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <input
+                      {...register('parentPassword')}
+                      type={showParentPassword ? 'text' : 'password'}
+                      className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="8文字以上"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowParentPassword(!showParentPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showParentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  {errors.parentPassword && (
+                    <p className="text-sm text-red-600 mt-1">{errors.parentPassword.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    保護者パスワード確認*
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <input
+                      {...register('parentConfirmPassword')}
+                      type={showParentConfirmPassword ? 'text' : 'password'}
+                      className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="パスワード再入力"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowParentConfirmPassword(!showParentConfirmPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showParentConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  {errors.parentConfirmPassword && (
+                    <p className="text-sm text-red-600 mt-1">{errors.parentConfirmPassword.message}</p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  保護者住所（任意）
+                </label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <input
+                    {...register('parentAddress')}
+                    type="text"
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="東京都渋谷区..."
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Student Information */}
+            <div className="space-y-4 border-t pt-6">
+              <h3 className="text-lg font-medium flex items-center gap-2">
+                <User className="h-5 w-5" />
+                学生基本情報
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     名前*
@@ -159,69 +277,7 @@ export function StudentRegistrationForm() {
                     <p className="text-sm text-red-600 mt-1">{errors.name.message}</p>
                   )}
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    パスワード*
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <input
-                      {...register('password')}
-                      type={showPassword ? 'text' : 'password'}
-                      className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="8文字以上"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                  {errors.password && (
-                    <p className="text-sm text-red-600 mt-1">{errors.password.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    パスワード確認*
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <input
-                      {...register('confirmPassword')}
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="パスワード再入力"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                  {errors.confirmPassword && (
-                    <p className="text-sm text-red-600 mt-1">{errors.confirmPassword.message}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Personal Information */}
-            <div className="space-y-4 border-t pt-6">
-              <h3 className="text-lg font-medium flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                個人情報（任意）
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     ふりがな
@@ -233,7 +289,9 @@ export function StudentRegistrationForm() {
                     placeholder="やまだたろう"
                   />
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     生年月日
@@ -244,9 +302,7 @@ export function StudentRegistrationForm() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     性別
@@ -261,20 +317,20 @@ export function StudentRegistrationForm() {
                     <option value="OTHER">その他</option>
                   </select>
                 </div>
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    住所
-                  </label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <input
-                      {...register('address')}
-                      type="text"
-                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="東京都渋谷区..."
-                    />
-                  </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  住所
+                </label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <input
+                    {...register('address')}
+                    type="text"
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="東京都渋谷区..."
+                  />
                 </div>
               </div>
             </div>
