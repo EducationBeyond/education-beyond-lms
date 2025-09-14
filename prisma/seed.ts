@@ -31,8 +31,8 @@ async function main() {
   // Create parent users and records
   const parentUser1 = await prisma.user.create({
     data: {
-      email: "tanaka.hiroshi@example.com",
-      name: "田中 寛",
+      email: "test.parent@example.com",
+      name: "テスト保護者",
       emailVerified: new Date(),
       passwordHash: await hash("parent123", 10),
     },
@@ -40,8 +40,8 @@ async function main() {
 
   const parent1 = await prisma.parent.create({
     data: {
-      email: "tanaka.hiroshi@example.com",
-      name: "田中 寛",
+      email: "test.parent@example.com",
+      name: "テスト保護者",
       address: "東京都渋谷区1-1-1",
       userId: parentUser1.id,
       createdBy: "system",
@@ -51,8 +51,8 @@ async function main() {
 
   const parentUser2 = await prisma.user.create({
     data: {
-      email: "suzuki.akiko@example.com",
-      name: "鈴木 明子",
+      email: "test.parent2@example.com",
+      name: "テスト保護者2",
       emailVerified: new Date(),
       passwordHash: await hash("parent123", 10),
     },
@@ -60,8 +60,8 @@ async function main() {
 
   const parent2 = await prisma.parent.create({
     data: {
-      email: "suzuki.akiko@example.com",
-      name: "鈴木 明子",
+      email: "test.parent2@example.com",
+      name: "テスト保護者2",
       address: "神奈川県横浜市2-2-2",
       userId: parentUser2.id,
       createdBy: "system",
@@ -72,9 +72,9 @@ async function main() {
   // Create sample students (some with email, some without to test role assignment)
   const student1 = await prisma.student.create({
     data: {
-      email: "tanaka.yuki@student.example.com",
-      name: "田中 由紀",
-      furigana: "たなか ゆき",
+      email: "test.student@example.com",
+      name: "テスト学生",
+      furigana: "てすと がくせい",
       parentId: parent1.id,
       birthdate: new Date("2010-04-15"),
       gender: "FEMALE",
@@ -90,8 +90,8 @@ async function main() {
   const student2 = await prisma.student.create({
     data: {
       email: null, // No email initially
-      name: "鈴木 健太",
-      furigana: "すずき けんた",
+      name: "テスト学生2",
+      furigana: "てすと がくせい2",
       parentId: parent2.id,
       birthdate: new Date("2012-08-22"),
       gender: "MALE",
@@ -105,8 +105,8 @@ async function main() {
   // Create a user for student1 (for demonstration)
   const studentUser1 = await prisma.user.create({
     data: {
-      email: "tanaka.yuki@student.example.com",
-      name: "田中 由紀",
+      email: "test.student@example.com",
+      name: "テスト学生",
       emailVerified: new Date(),
     },
   });
@@ -120,8 +120,8 @@ async function main() {
   // Create tutor users and records
   const tutorUser1 = await prisma.user.create({
     data: {
-      email: "yamada.sensei@tutor.example.com",
-      name: "山田 太郎",
+      email: "test.tutor@example.com",
+      name: "テストチューター",
       emailVerified: new Date(),
       passwordHash: await hash("tutor123", 10),
     },
@@ -129,8 +129,8 @@ async function main() {
 
   const tutor1 = await prisma.tutor.create({
     data: {
-      email: "yamada.sensei@tutor.example.com",
-      name: "山田 太郎",
+      email: "test.tutor@example.com",
+      name: "テストチューター",
       furigana: "やまだ たろう",
       address: "東京都新宿区3-3-3",
       affiliation: "東京大学大学院",
@@ -150,8 +150,8 @@ async function main() {
 
   const tutorUser2 = await prisma.user.create({
     data: {
-      email: "sato.sensei@tutor.example.com",
-      name: "佐藤 花子",
+      email: "test.tutor2@example.com",
+      name: "テストチューター2",
       emailVerified: new Date(),
       passwordHash: await hash("tutor123", 10),
     },
@@ -159,8 +159,8 @@ async function main() {
 
   const tutor2 = await prisma.tutor.create({
     data: {
-      email: "sato.sensei@tutor.example.com",
-      name: "佐藤 花子",
+      email: "test.tutor2@example.com",
+      name: "テストチューター2",
       furigana: "さとう はなこ",
       address: "千葉県千葉市4-4-4",
       affiliation: "早稲田大学",
@@ -319,8 +319,8 @@ async function main() {
 
 Test accounts:
   Admin: test.admin@example.com / admin123
-  Parent: tanaka.hiroshi@example.com / parent123
-  Tutor: yamada.sensei@tutor.example.com / tutor123
+  Parent: test.parent@example.com / parent123
+  Tutor: test.tutor@example.com / tutor123
   Unassigned User: unassigned.user@gmail.com (OAuth only)`);
 }
 
