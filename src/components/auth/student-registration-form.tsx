@@ -9,18 +9,18 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckboxTagInput } from '@/components/ui/tag-input';
-import { Eye, EyeOff, User, Mail, Lock, Calendar, MapPin, Heart, UserCheck } from 'lucide-react';
+import { Eye, EyeOff, User, Mail, Lock, MapPin, Heart, UserCheck } from 'lucide-react';
 
 const studentRegistrationSchema = z.object({
   // 保護者情報
-  parentEmail: z.string().email('有効なメールアドレスを入力してください'),
-  parentPassword: z.string().min(8, 'パスワードは8文字以上で入力してください'),
-  parentConfirmPassword: z.string().min(8, 'パスワードを再入力してください'),
-  parentName: z.string().min(1, '保護者名は必須です'),
+  parentEmail: z.string().email({ message: '有効なメールアドレスを入力してください' }),
+  parentPassword: z.string().min(8, { message: 'パスワードは8文字以上で入力してください' }),
+  parentConfirmPassword: z.string().min(8, { message: 'パスワードを再入力してください' }),
+  parentName: z.string().min(1, { message: '保護者名は必須です' }),
   parentAddress: z.string().optional(),
 
   // 学生情報（メールアドレスとパスワードは運営側で後から設定）
-  name: z.string().min(1, '名前は必須です'),
+  name: z.string().min(1, { message: '名前は必須です' }),
   furigana: z.string().optional(),
   address: z.string().optional(),
   birthdate: z.string().optional(),

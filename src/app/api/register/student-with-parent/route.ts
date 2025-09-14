@@ -26,8 +26,9 @@ const parentStudentRegistrationSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  let body: any;
   try {
-    const body = await request.json();
+    body = await request.json();
     const validatedData = parentStudentRegistrationSchema.parse(body);
 
     const { parent: parentData, student: studentData } = validatedData;

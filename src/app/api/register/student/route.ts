@@ -29,9 +29,9 @@ export async function POST(request: NextRequest) {
     // バリデーション
     const validationResult = studentRegistrationSchema.safeParse(body);
     if (!validationResult.success) {
-      console.log('[API Student Registration] Validation error:', validationResult.error.errors);
+      console.log('[API Student Registration] Validation error:', validationResult.error.issues);
       return NextResponse.json(
-        { error: 'Validation failed', details: validationResult.error.errors },
+        { error: 'Validation failed', details: validationResult.error.issues },
         { status: 400 }
       );
     }

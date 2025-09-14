@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSession } from 'next-auth/react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
 
-export default function GoogleLinkCallbackPage() {
+function GoogleLinkCallbackContent() {
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -161,5 +161,22 @@ export default function GoogleLinkCallbackPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function GoogleLinkCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex flex-col items-center space-y-4 pt-6">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            <p className="text-sm text-muted-foreground">読み込み中...</p>
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <GoogleLinkCallbackContent />
+    </Suspense>
   );
 }

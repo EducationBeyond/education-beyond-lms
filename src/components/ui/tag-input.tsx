@@ -204,10 +204,10 @@ export function CheckboxTagInput({
               onChange={(e) =>
                 handleCheckboxChange(option.value, e.target.checked)
               }
-              disabled={
+              disabled={Boolean(
                 disabled ||
                 (maxTags && !value.includes(option.value) && value.length >= maxTags)
-              }
+              )}
               className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
             <span className="text-sm text-gray-700">{option.label}</span>

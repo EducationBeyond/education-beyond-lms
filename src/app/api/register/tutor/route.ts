@@ -24,9 +24,9 @@ export async function POST(request: NextRequest) {
     // バリデーション
     const validationResult = tutorRegistrationSchema.safeParse(body);
     if (!validationResult.success) {
-      console.log('[API Tutor Registration] Validation error:', validationResult.error.errors);
+      console.log('[API Tutor Registration] Validation error:', validationResult.error.issues);
       return NextResponse.json(
-        { error: 'Validation failed', details: validationResult.error.errors },
+        { error: 'Validation failed', details: validationResult.error.issues },
         { status: 400 }
       );
     }
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
           address: data.address || null,
           affiliation: data.affiliation || null,
           specialties: data.specialties || [],
-          bankAccountInfo: data.bankAccountInfo || null,
+          bankAccountInfo: data.bankAccountInfo || undefined,
         },
       });
 

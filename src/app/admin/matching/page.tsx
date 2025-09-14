@@ -12,7 +12,7 @@ export default async function AdminMatchingPage() {
 
   const userRole = await getUserRole(session.user.email);
   if (userRole !== 'admin') {
-    redirect('/dashboard');
+    redirect('/');
   }
 
   return (

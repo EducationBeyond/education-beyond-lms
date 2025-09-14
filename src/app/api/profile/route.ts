@@ -117,13 +117,13 @@ export async function PUT(request: NextRequest) {
           where: { email: session.user.email },
           data: {
             name: validatedData.name,
-            furigana: validatedData.furigana,
-            address: validatedData.address,
-            birthdate: validatedData.birthdate ? new Date(validatedData.birthdate) : undefined,
-            gender: validatedData.gender,
+            furigana: validatedData.furigana || null,
+            address: validatedData.address || null,
+            birthdate: validatedData.birthdate ? new Date(validatedData.birthdate) : null,
+            gender: validatedData.gender || null,
             giftedTraits: validatedData.giftedTraits || [],
             interests: validatedData.interests || [],
-            cautions: validatedData.cautions,
+            cautions: validatedData.cautions || null,
           }
         });
         break;
@@ -134,7 +134,7 @@ export async function PUT(request: NextRequest) {
           where: { email: session.user.email },
           data: {
             name: validatedData.name,
-            address: validatedData.address,
+            address: validatedData.address || null,
           }
         });
         break;
@@ -143,17 +143,21 @@ export async function PUT(request: NextRequest) {
         const validatedData = tutorProfileSchema.parse(body);
         console.log('[API Profile] Validated data for tutor:', validatedData);
         
-        const updateData = {
+        const updateData: any = {
           name: validatedData.name,
-          furigana: validatedData.furigana,
-          affiliation: validatedData.affiliation,
-          address: validatedData.address,
+          furigana: validatedData.furigana || null,
+          affiliation: validatedData.affiliation || null,
+          address: validatedData.address || null,
           specialties: validatedData.specialties || [],
-          avatarUrl: validatedData.avatarUrl,
-          bankAccountInfo: validatedData.bankAccountInfo,
-          interviewCalendarUrl: validatedData.interviewCalendarUrl,
-          lessonCalendarUrl: validatedData.lessonCalendarUrl,
+          avatarUrl: validatedData.avatarUrl || null,
+          interviewCalendarUrl: validatedData.interviewCalendarUrl || null,
+          lessonCalendarUrl: validatedData.lessonCalendarUrl || null,
         };
+
+        // Handle bankAccountInfo - convert string to JSON or set as null
+        if (validatedData.bankAccountInfo) {
+          updateData.bankAccountInfo = validatedData.bankAccountInfo;
+        }
         
         console.log('[API Profile] Update data:', updateData);
         

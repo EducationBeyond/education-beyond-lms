@@ -12,7 +12,7 @@ export default async function StudentAssignedTutorPage() {
 
   const userRole = await getUserRole(session.user.email);
   if (userRole !== 'student') {
-    redirect('/dashboard');
+    redirect('/');
   }
 
   return (

@@ -12,7 +12,7 @@ import { CheckboxTagInput } from '@/components/ui/tag-input';
 import { Eye, EyeOff, User, Mail, Lock, Building, MapPin, BookOpen, CreditCard } from 'lucide-react';
 
 const tutorRegistrationSchema = z.object({
-  email: z.string().email('有効なメールアドレスを入力してください'),
+  email: z.string().email({ message: '有効なメールアドレスを入力してください' }),
   password: z.string().min(8, 'パスワードは8文字以上で入力してください'),
   confirmPassword: z.string().min(8, 'パスワードを再入力してください'),
   name: z.string().min(1, '名前は必須です'),
