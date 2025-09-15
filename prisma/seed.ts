@@ -135,7 +135,6 @@ async function main() {
       address: "東京都新宿区3-3-3",
       affiliation: "東京大学大学院",
       specialties: ["mathematics", "physics", "chemistry"],
-      avatarUrl: "https://example.com/avatars/yamada.jpg",
       bankAccountInfo: {
         bankName: "三菱UFJ銀行",
         branchName: "新宿支店",
