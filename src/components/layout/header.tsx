@@ -149,7 +149,7 @@ export function Header() {
                     onClick={handleSignOut}
                     variant="outline"
                     size="sm"
-                    className="text-gray-700 hover:text-gray-900"
+                    className="hidden lg:block text-gray-700 hover:text-gray-900"
                   >
                     ログアウト
                   </Button>

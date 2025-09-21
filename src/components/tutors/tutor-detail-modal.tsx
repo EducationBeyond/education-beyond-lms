@@ -18,6 +18,14 @@ interface Tutor {
   updatedAt: string;
 }
 
+interface Pairing {
+  id: string;
+  status: string;
+  score?: number;
+  startedAt?: string;
+  createdAt: string;
+}
+
 interface TutorDetailModalProps {
   tutorId: string | null;
   isOpen: boolean;
@@ -39,12 +47,14 @@ const specialtyMap: Record<string, string> = {
 
 export function TutorDetailModal({ tutorId, isOpen, onClose }: TutorDetailModalProps) {
   const [tutor, setTutor] = useState<Tutor | null>(null);
+  const [pairing, setPairing] = useState<Pairing | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!tutorId || !isOpen) {
       setTutor(null);
+      setPairing(null);
       setError(null);
       return;
     }
@@ -52,16 +62,17 @@ export function TutorDetailModal({ tutorId, isOpen, onClose }: TutorDetailModalP
     const fetchTutorDetail = async () => {
       setLoading(true);
       setError(null);
-      
+
       try {
         const response = await fetch(`/api/tutors/${tutorId}`);
-        
+
         if (!response.ok) {
           throw new Error('Failed to fetch tutor details');
         }
-        
+
         const data = await response.json();
         setTutor(data.tutor);
+        setPairing(data.pairing || null);
       } catch (error) {
         console.error('[TutorDetailModal] Error fetching tutor details:', error);
         setError('チューターの詳細情報を取得できませんでした。');
@@ -206,7 +217,7 @@ export function TutorDetailModal({ tutorId, isOpen, onClose }: TutorDetailModalP
 
           {/* Footer */}
           <div className="flex justify-between items-center p-6 border-t border-gray-200">
-            {tutor && (tutor.interviewCalendarUrl || tutor.lessonCalendarUrl) ? (
+            {tutor && (tutor.interviewCalendarUrl || (tutor.lessonCalendarUrl && pairing && pairing.status === 'ACTIVE')) ? (
               <div className="flex space-x-3">
                 {tutor.interviewCalendarUrl && (
                   <button
@@ -218,7 +229,7 @@ export function TutorDetailModal({ tutorId, isOpen, onClose }: TutorDetailModalP
                     <ExternalLink className="h-4 w-4 ml-2" />
                   </button>
                 )}
-                {tutor.lessonCalendarUrl && (
+                {tutor.lessonCalendarUrl && pairing && pairing.status === 'ACTIVE' && (
                   <button
                     onClick={() => window.open(tutor.lessonCalendarUrl, '_blank')}
                     className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
