@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { getUserRole } from '@/lib/user-role';
-
-const prisma = new PrismaClient();
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,7 +19,7 @@ export async function GET(request: NextRequest) {
     // チューターの情報を取得
     const tutor = await prisma.tutor.findUnique({
       where: { email: session.user.email },
-      select: { id: true, name: true, email: true }
+      select: { id: true, firstName: true, lastName: true, email: true }
     });
 
     if (!tutor) {
@@ -41,8 +39,8 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             email: true,
-            name: true,
-            furigana: true,
+            firstName: true,
+            lastName: true,
             birthdate: true,
             gender: true,
             interests: true,

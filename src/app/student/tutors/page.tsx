@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { User, BookOpen, Building, Search, RefreshCw } from 'lucide-react';
 import { TutorDetailModal } from '@/components/tutors/tutor-detail-modal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -195,10 +196,12 @@ export default function StudentTutorsPage() {
                     <CardHeader className="pb-3">
                       <div className="flex items-center space-x-3">
                         {tutor.avatarUrl ? (
-                          <img
+                          <Image
                             className="h-12 w-12 rounded-full object-cover"
                             src={tutor.avatarUrl}
                             alt={getTutorDisplayName(tutor)}
+                            width={48}
+                            height={48}
                           />
                         ) : (
                           <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">

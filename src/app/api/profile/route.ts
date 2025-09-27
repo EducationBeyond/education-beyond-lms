@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '../../../../auth';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { getUserRole } from '@/lib/user-role';
 
-const prisma = new PrismaClient();
-
 const studentProfileSchema = z.object({
-  name: z.string().min(1, '名前は必須です'),
+  firstName: z.string().min(1, '名は必須です'),
+  lastName: z.string().min(1, '姓は必須です'),
   furigana: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
   birthdate: z.string().optional().nullable(),
@@ -18,12 +17,14 @@ const studentProfileSchema = z.object({
 });
 
 const parentProfileSchema = z.object({
-  name: z.string().min(1, '名前は必須です'),
+  firstName: z.string().min(1, '名は必須です'),
+  lastName: z.string().min(1, '姓は必須です'),
   address: z.string().optional().nullable(),
 });
 
 const tutorProfileSchema = z.object({
-  name: z.string().min(1, '名前は必須です'),
+  firstName: z.string().min(1, '名は必須です'),
+  lastName: z.string().min(1, '姓は必須です'),
   furigana: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
   affiliation: z.string().optional().nullable(),
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
           where: { email: session.user.email },
           include: {
             parent: {
-              select: { id: true, name: true }
+              select: { id: true, firstName: true, lastName: true }
             }
           }
         });
@@ -61,7 +62,7 @@ export async function GET(request: NextRequest) {
           where: { email: session.user.email },
           include: {
             students: {
-              select: { id: true, name: true }
+              select: { id: true, firstName: true, lastName: true }
             }
           }
         });
@@ -116,12 +117,13 @@ export async function PUT(request: NextRequest) {
         updatedProfile = await prisma.student.update({
           where: { email: session.user.email },
           data: {
-            name: validatedData.name,
-            furigana: validatedData.furigana || null,
-            address: validatedData.address || null,
-            birthdate: validatedData.birthdate ? new Date(validatedData.birthdate) : null,
-            gender: validatedData.gender || null,
-            giftedTraits: validatedData.giftedTraits || [],
+            firstName: validatedData.firstName,
+            lastName: validatedData.lastName,
+            // furigana: validatedData.furigana || null, // Remove if not in schema
+            // address: validatedData.address || null,   // Remove if not in schema
+            birthdate: validatedData.birthdate ? new Date(validatedData.birthdate) : undefined,
+            gender: validatedData.gender || undefined,
+            // giftedTraits: validatedData.giftedTraits || [], // Check if this field exists
             interests: validatedData.interests || [],
             cautions: validatedData.cautions || null,
           }
@@ -133,8 +135,9 @@ export async function PUT(request: NextRequest) {
         updatedProfile = await prisma.parent.update({
           where: { email: session.user.email },
           data: {
-            name: validatedData.name,
-            address: validatedData.address || null,
+            firstName: validatedData.firstName,
+            lastName: validatedData.lastName,
+            // address: validatedData.address || null, // Check if this field exists in Parent schema
           }
         });
         break;
@@ -144,10 +147,11 @@ export async function PUT(request: NextRequest) {
         console.log('[API Profile] Validated data for tutor:', validatedData);
         
         const updateData: any = {
-          name: validatedData.name,
-          furigana: validatedData.furigana || null,
+          firstName: validatedData.firstName,
+          lastName: validatedData.lastName,
+          // furigana: validatedData.furigana || null, // Check if this field exists
           affiliation: validatedData.affiliation || null,
-          address: validatedData.address || null,
+          // address: validatedData.address || null,  // Check if this field exists
           specialties: validatedData.specialties || [],
           avatarUrl: validatedData.avatarUrl || null,
           interviewCalendarUrl: validatedData.interviewCalendarUrl || null,

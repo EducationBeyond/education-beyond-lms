@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { ProfileForm } from '@/components/profile/profile-form';
 import { ImageUpload } from '@/components/profile/image-upload';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -128,10 +129,12 @@ export function TutorProfileClient({ initialData }: TutorProfileClientProps) {
               <CardTitle>現在のプロフィール画像</CardTitle>
             </CardHeader>
             <CardContent>
-              <img
+              <Image
                 src={avatarUrl}
                 alt="プロフィール画像"
                 className="w-32 h-32 rounded-full object-cover mx-auto"
+                width={128}
+                height={128}
               />
             </CardContent>
           </Card>

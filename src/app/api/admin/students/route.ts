@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
         }
       },
       orderBy: {
-        name: 'asc'
+        firstName: 'asc'
       }
     });
 

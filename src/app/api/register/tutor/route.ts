@@ -1,25 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
-
-const prisma = new PrismaClient();
 
 const tutorRegistrationSchema = z.object({
   email: z.string().email('有効なメールアドレスを入力してください'),
   password: z.string().min(8, 'パスワードは8文字以上で入力してください'),
-  name: z.string().min(1, '名前は必須です'),
-  furigana: z.string().optional(),
-  address: z.string().optional(),
+  firstName: z.string().min(1, '名は必須です'),
+  lastName: z.string().min(1, '姓は必須です'),
   affiliation: z.string().optional(),
   specialties: z.array(z.string()).optional(),
-  bankAccountInfo: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    console.log('[API Tutor Registration] Registration request:', { email: body.email, name: body.name });
+    console.log('[API Tutor Registration] Registration request:', { email: body.email, firstName: body.firstName, lastName: body.lastName });
 
     // バリデーション
     const validationResult = tutorRegistrationSchema.safeParse(body);
@@ -68,7 +64,7 @@ export async function POST(request: NextRequest) {
       const user = await tx.user.create({
         data: {
           email: data.email,
-          name: data.name,
+          name: `${data.lastName} ${data.firstName}`,
           passwordHash,
         },
       });
@@ -77,12 +73,28 @@ export async function POST(request: NextRequest) {
       const tutor = await tx.tutor.create({
         data: {
           email: data.email,
-          name: data.name,
-          furigana: data.furigana || null,
-          address: data.address || null,
-          affiliation: data.affiliation || null,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          firstNameKana: '',
+          lastNameKana: '',
+          nameAlphabet: '',
+          phoneNumber: '',
+          postalCode: '',
+          prefecture: '',
+          city: '',
+          addressDetail: '',
+          nearestStation: '',
+          affiliation: data.affiliation || '',
+          education: '',
           specialties: data.specialties || [],
-          bankAccountInfo: data.bankAccountInfo || undefined,
+          selfIntroduction: '',
+          bankName: '',
+          bankCode: '',
+          branchName: '',
+          branchCode: '',
+          accountType: '',
+          accountNumber: '',
+          userId: `tutor-${Date.now()}`,
         },
       });
 

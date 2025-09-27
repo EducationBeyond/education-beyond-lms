@@ -1,10 +1,8 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { TutorProfileClient } from './tutor-profile-client';
 import { getUserRole } from '@/lib/user-role';
-
-const prisma = new PrismaClient();
 
 export default async function TutorProfilePage() {
   const session = await auth();
@@ -24,7 +22,7 @@ export default async function TutorProfilePage() {
       pairings: {
         where: { status: 'ACTIVE' },
         include: {
-          student: { select: { id: true, name: true } }
+          student: { select: { id: true, firstName: true, lastName: true } }
         }
       },
       availabilities: {

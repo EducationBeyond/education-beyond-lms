@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import type { UserRole } from '@/lib/user-role';
-
-const prisma = new PrismaClient();
 
 // 登録用スキーマ
 const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
-  name: z.string().min(1),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
   role: z.enum(['STUDENT', 'PARENT', 'TUTOR']), // ADMINは除外（管理者が作成）
 });
 
@@ -19,7 +18,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = registerSchema.parse(body);
     
-    const { email, password, name, role } = validatedData;
+    const { email, password, firstName, lastName, role } = validatedData;
 
     // 既存ユーザーチェック
     const existingUser = await checkUserExists(email);
@@ -39,10 +38,23 @@ export async function POST(request: NextRequest) {
       case 'STUDENT':
         // Studentの場合、一時的なParentレコードも作成
         // 実際の運用では親が先に登録するか、別途親子関係を設定する
+        // 一時的なユーザーIDを生成（親用）
+        const tempUserId = `temp-parent-${Date.now()}`;
+
         const tempParent = await prisma.parent.create({
           data: {
             email: `temp.parent.${Date.now()}@temp.example.com`,
-            name: `${name}の保護者（未設定）`,
+            firstName: '未設定',
+            lastName: `${lastName}の保護者`,
+            firstNameKana: 'ミセッテイ',
+            lastNameKana: 'ホゴシャ',
+            nameAlphabet: 'Guardian',
+            phoneNumber: '',
+            postalCode: '',
+            prefecture: '',
+            city: '',
+            addressDetail: '',
+            userId: tempUserId,
           },
         });
 
@@ -50,8 +62,19 @@ export async function POST(request: NextRequest) {
           data: {
             email,
             password: hashedPassword,
-            name,
+            firstName,
+            lastName,
+            lastNameKana: '',
+            firstNameKana: '',
+            nameAlphabet: '',
             parentId: tempParent.id,
+            birthdate: new Date('2000-01-01'), // デフォルト日付
+            gender: 'OTHER', // デフォルト値
+            giftedEpisodes: '',
+            interests: [],
+            schoolName: '',
+            cautions: '',
+            howDidYouKnow: '',
           },
         });
         break;
@@ -61,7 +84,17 @@ export async function POST(request: NextRequest) {
           data: {
             email,
             password: hashedPassword,
-            name,
+            firstName,
+            lastName,
+            lastNameKana: '',
+            firstNameKana: '',
+            nameAlphabet: '',
+            phoneNumber: '',
+            postalCode: '',
+            prefecture: '',
+            city: '',
+            addressDetail: '',
+            userId: `parent-${Date.now()}`,
           },
         });
         break;
@@ -71,7 +104,28 @@ export async function POST(request: NextRequest) {
           data: {
             email,
             password: hashedPassword,
-            name,
+            firstName,
+            lastName,
+            lastNameKana: '',
+            firstNameKana: '',
+            nameAlphabet: '',
+            phoneNumber: '',
+            postalCode: '',
+            prefecture: '',
+            city: '',
+            addressDetail: '',
+            nearestStation: '',
+            affiliation: '',
+            education: '',
+            specialties: [],
+            selfIntroduction: '',
+            bankName: '',
+            bankCode: '',
+            branchName: '',
+            branchCode: '',
+            accountType: '',
+            accountNumber: '',
+            userId: `tutor-${Date.now()}`,
           },
         });
         break;
@@ -88,7 +142,8 @@ export async function POST(request: NextRequest) {
       user: {
         id: createdUser.id,
         email: createdUser.email,
-        name: createdUser.name,
+        firstName: createdUser.firstName,
+        lastName: createdUser.lastName,
         role,
       },
     });
@@ -107,8 +162,6 @@ export async function POST(request: NextRequest) {
       { error: 'Internal server error' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
 

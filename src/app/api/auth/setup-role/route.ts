@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { auth } from '@/auth';
-
-const prisma = new PrismaClient();
 
 const setupRoleSchema = z.object({
   email: z.string().email(),
@@ -39,14 +37,40 @@ export async function POST(request: NextRequest) {
       case 'STUDENT':
         // Studentの場合は、Parentレコードも必要なので一時的な対応
         // 実際の運用では、Parentが先に登録されている必要がある
+        const userName = session.user.name || 'Unknown Student';
+        const [firstName, lastName] = userName.split(' ').length > 1
+          ? [userName.split(' ')[1], userName.split(' ')[0]]
+          : [userName, ''];
+
         result = await prisma.student.create({
           data: {
             email,
-            name: session.user.name || 'Unknown Student',
+            firstName,
+            lastName,
+            lastNameKana: '',
+            firstNameKana: '',
+            nameAlphabet: '',
+            birthdate: new Date('2000-01-01'),
+            gender: 'OTHER',
+            giftedEpisodes: '',
+            interests: [],
+            schoolName: '',
+            cautions: '',
+            howDidYouKnow: '',
             parent: {
               create: {
                 email: `temp.parent.${Date.now()}@temp.example.com`,
-                name: `${session.user.name || 'Unknown Student'}の保護者（未設定）`,
+                firstName: '未設定',
+                lastName: `${lastName}の保護者`,
+                lastNameKana: '',
+                firstNameKana: '',
+                nameAlphabet: '',
+                phoneNumber: '',
+                postalCode: '',
+                prefecture: '',
+                city: '',
+                addressDetail: '',
+                userId: `temp-parent-${Date.now()}`,
               },
             },
           },
@@ -54,19 +78,60 @@ export async function POST(request: NextRequest) {
         break;
 
       case 'PARENT':
+        const parentName = session.user.name || 'Unknown Parent';
+        const [parentFirstName, parentLastName] = parentName.split(' ').length > 1
+          ? [parentName.split(' ')[1], parentName.split(' ')[0]]
+          : [parentName, ''];
+
         result = await prisma.parent.create({
           data: {
             email: email,
-            name: session.user.name || 'Unknown Parent',
+            firstName: parentFirstName,
+            lastName: parentLastName,
+            lastNameKana: '',
+            firstNameKana: '',
+            nameAlphabet: '',
+            phoneNumber: '',
+            postalCode: '',
+            prefecture: '',
+            city: '',
+            addressDetail: '',
+            userId: `parent-${Date.now()}`,
           },
         });
         break;
 
       case 'TUTOR':
+        const tutorName = session.user.name || 'Unknown Tutor';
+        const [tutorFirstName, tutorLastName] = tutorName.split(' ').length > 1
+          ? [tutorName.split(' ')[1], tutorName.split(' ')[0]]
+          : [tutorName, ''];
+
         result = await prisma.tutor.create({
           data: {
             email,
-            name: session.user.name || 'Unknown Tutor',
+            firstName: tutorFirstName,
+            lastName: tutorLastName,
+            lastNameKana: '',
+            firstNameKana: '',
+            nameAlphabet: '',
+            phoneNumber: '',
+            postalCode: '',
+            prefecture: '',
+            city: '',
+            addressDetail: '',
+            nearestStation: '',
+            affiliation: '',
+            education: '',
+            specialties: [],
+            selfIntroduction: '',
+            bankName: '',
+            bankCode: '',
+            branchName: '',
+            branchCode: '',
+            accountType: '',
+            accountNumber: '',
+            userId: `tutor-${Date.now()}`,
           },
         });
         break;
@@ -94,8 +159,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       error: 'Internal server error' 
     }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }
 

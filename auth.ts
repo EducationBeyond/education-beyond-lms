@@ -11,6 +11,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
   secret: process.env.AUTH_SECRET,
   debug: process.env.NODE_ENV === 'development',
+  trustHost: true, // 開発環境でのUntrustedHostエラーを回避
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,

@@ -1,26 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
-
-const prisma = new PrismaClient();
 
 // 保護者と参加者の統合登録用スキーマ
 const parentStudentRegistrationSchema = z.object({
   parent: z.object({
     email: z.string().email('有効なメールアドレスを入力してください'),
     password: z.string().min(8, 'パスワードは8文字以上で入力してください'),
-    name: z.string().min(1, '保護者名は必須です'),
-    address: z.string().optional(),
+    firstName: z.string().min(1, '保護者の名は必須です'),
+    lastName: z.string().min(1, '保護者の姓は必須です'),
   }),
   student: z.object({
-    name: z.string().min(1, '参加者名は必須です'),
-    furigana: z.string().optional(),
-    address: z.string().optional(),
+    firstName: z.string().min(1, '参加者の名は必須です'),
+    lastName: z.string().min(1, '参加者の姓は必須です'),
     birthdate: z.string().optional(),
     gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
     interests: z.array(z.string()).optional().default([]),
-    giftedTraits: z.array(z.string()).optional().default([]),
     cautions: z.string().optional(),
   }),
 });
@@ -56,8 +52,17 @@ export async function POST(request: NextRequest) {
         data: {
           email: parentData.email,
           password: hashedParentPassword,
-          name: parentData.name,
-          address: parentData.address,
+          firstName: parentData.firstName,
+          lastName: parentData.lastName,
+          firstNameKana: '',
+          lastNameKana: '',
+          nameAlphabet: '',
+          phoneNumber: '',
+          postalCode: '',
+          prefecture: '',
+          city: '',
+          addressDetail: '',
+          userId: `parent-${Date.now()}`,
           createdBy: 'system',
           updatedBy: 'system',
         },
@@ -69,15 +74,19 @@ export async function POST(request: NextRequest) {
       const studentCreateData = {
         email: null, // 明示的にnullを設定（運営側で後から設定）
         password: null, // 明示的にnullを設定（運営側で後から設定）
-        name: studentData.name,
-        furigana: studentData.furigana,
+        firstName: studentData.firstName,
+        lastName: studentData.lastName,
+        firstNameKana: '',
+        lastNameKana: '',
+        nameAlphabet: '',
         parentId: createdParent.id, // 自動紐づけ
-        address: studentData.address,
-        birthdate: studentData.birthdate ? new Date(studentData.birthdate) : null,
-        gender: studentData.gender,
+        birthdate: studentData.birthdate ? new Date(studentData.birthdate) : new Date('2000-01-01'),
+        gender: studentData.gender || 'OTHER',
+        giftedEpisodes: '',
         interests: studentData.interests || [],
-        giftedTraits: studentData.giftedTraits || [],
-        cautions: studentData.cautions,
+        schoolName: '',
+        cautions: studentData.cautions || '',
+        howDidYouKnow: '',
         createdBy: 'system',
         updatedBy: 'system',
       };
@@ -96,11 +105,13 @@ export async function POST(request: NextRequest) {
       parent: {
         id: result.parent.id,
         email: result.parent.email,
-        name: result.parent.name,
+        firstName: result.parent.firstName,
+        lastName: result.parent.lastName,
       },
       student: {
         id: result.student.id,
-        name: result.student.name,
+        firstName: result.student.firstName,
+        lastName: result.student.lastName,
         parentId: result.student.parentId,
         // email は後から設定されるため含めない
       },
@@ -138,8 +149,6 @@ export async function POST(request: NextRequest) {
       },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
 

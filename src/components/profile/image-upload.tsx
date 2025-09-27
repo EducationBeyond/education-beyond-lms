@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -89,10 +90,12 @@ export function ImageUpload({ currentImageUrl, onImageUpload }: ImageUploadProps
         <div className="flex flex-col items-center space-y-4">
           {previewUrl && (
             <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-200">
-              <img
+              <Image
                 src={previewUrl}
                 alt="プロフィール画像"
                 className="w-full h-full object-cover"
+                width={128}
+                height={128}
               />
             </div>
           )}

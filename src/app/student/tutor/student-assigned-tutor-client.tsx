@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { User, Mail, Building, MapPin, BookOpen, Calendar, ExternalLink, GraduationCap, UserCheck } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -137,10 +138,12 @@ export function StudentAssignedTutorClient() {
             <div className="flex items-start space-x-4">
               <div className="flex-shrink-0">
                 {tutor.avatarUrl ? (
-                  <img
+                  <Image
                     className="h-16 w-16 rounded-full object-cover"
                     src={tutor.avatarUrl}
                     alt={tutor.name}
+                    width={64}
+                    height={64}
                   />
                 ) : (
                   <div className="h-16 w-16 rounded-full bg-gray-300 flex items-center justify-center">

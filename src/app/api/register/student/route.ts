@@ -1,30 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
-
-const prisma = new PrismaClient();
 
 const studentRegistrationSchema = z.object({
   email: z.string().email('有効なメールアドレスを入力してください'),
   password: z.string().min(8, 'パスワードは8文字以上で入力してください'),
-  name: z.string().min(1, '名前は必須です'),
-  furigana: z.string().optional(),
-  address: z.string().optional(),
+  firstName: z.string().min(1, '名は必須です'),
+  lastName: z.string().min(1, '姓は必須です'),
   birthdate: z.string().optional(),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
   interests: z.array(z.string()).optional(),
-  giftedTraits: z.array(z.string()).optional(),
   cautions: z.string().optional(),
   // 保護者情報（オプション、未指定時は参加者と同じ情報でParentを作成）
   parentEmail: z.string().email().optional(),
-  parentName: z.string().optional(),
+  parentFirstName: z.string().optional(),
+  parentLastName: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    console.log('[API Student Registration] Registration request:', { email: body.email, name: body.name });
+    console.log('[API Student Registration] Registration request:', { email: body.email, firstName: body.firstName, lastName: body.lastName });
 
     // バリデーション
     const validationResult = studentRegistrationSchema.safeParse(body);
@@ -73,14 +70,15 @@ export async function POST(request: NextRequest) {
       const user = await tx.user.create({
         data: {
           email: data.email,
-          name: data.name,
+          name: `${data.lastName} ${data.firstName}`,
           passwordHash,
         },
       });
 
       // 保護者情報を決定（未指定時は参加者と同じ情報を使用）
       const parentEmail = data.parentEmail || data.email;
-      const parentName = data.parentName || data.name + ' 保護者';
+      const parentFirstName = data.parentFirstName || '未設定';
+      const parentLastName = data.parentLastName || data.lastName + 'の保護者';
 
       // 既存のParentをチェック
       let parent = await tx.parent.findUnique({
@@ -92,8 +90,17 @@ export async function POST(request: NextRequest) {
         parent = await tx.parent.create({
           data: {
             email: parentEmail,
-            name: parentName,
-            address: data.address || null,
+            firstName: parentFirstName,
+            lastName: parentLastName,
+            firstNameKana: '',
+            lastNameKana: '',
+            nameAlphabet: '',
+            phoneNumber: '',
+            postalCode: '',
+            prefecture: '',
+            city: '',
+            addressDetail: '',
+            userId: `parent-${Date.now()}`,
           },
         });
         console.log('[API Student Registration] Created parent:', { parentId: parent.id, email: parentEmail });
@@ -105,14 +112,18 @@ export async function POST(request: NextRequest) {
       const student = await tx.student.create({
         data: {
           email: data.email,
-          name: data.name,
-          furigana: data.furigana || null,
-          address: data.address || null,
-          birthdate: data.birthdate ? new Date(data.birthdate) : null,
-          gender: data.gender || null,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          firstNameKana: '',
+          lastNameKana: '',
+          nameAlphabet: '',
+          birthdate: data.birthdate ? new Date(data.birthdate) : new Date('2000-01-01'),
+          gender: data.gender || 'OTHER',
+          giftedEpisodes: '',
           interests: data.interests || [],
-          giftedTraits: data.giftedTraits || [],
-          cautions: data.cautions || null,
+          schoolName: '',
+          cautions: data.cautions || '',
+          howDidYouKnow: '',
           parentId: parent.id, // 必須のparentIdを設定
         },
       });

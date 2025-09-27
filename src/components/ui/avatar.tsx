@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 
 const Avatar = React.forwardRef<
@@ -20,14 +21,27 @@ Avatar.displayName = "Avatar"
 
 const AvatarImage = React.forwardRef<
   HTMLImageElement,
-  React.ImgHTMLAttributes<HTMLImageElement>
->(({ className, ...props }, ref) => (
-  <img
-    ref={ref}
-    className={cn("aspect-square h-full w-full", className)}
-    {...props}
-  />
-))
+  Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'src'> & {
+    width?: number;
+    height?: number;
+    src?: string;
+  }
+>(({ className, width = 40, height = 40, alt = "", src, ...props }, ref) => {
+  if (!src || typeof src !== 'string') {
+    return null;
+  }
+
+  return (
+    <Image
+      className={cn("aspect-square h-full w-full object-cover", className)}
+      width={width}
+      height={height}
+      alt={alt}
+      src={src}
+      {...props}
+    />
+  );
+})
 AvatarImage.displayName = "AvatarImage"
 
 const AvatarFallback = React.forwardRef<
