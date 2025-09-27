@@ -11,7 +11,8 @@ import { Badge } from '@/components/ui/badge';
 interface Student {
   id: string;
   email: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   furigana?: string;
   interests: string[];
   parent: { id: string; name: string };
@@ -21,7 +22,8 @@ interface Student {
 interface Tutor {
   id: string;
   email: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   furigana?: string;
   affiliation?: string;
   specialties: string[];
@@ -34,8 +36,8 @@ interface Pairing {
   status: string;
   score?: number;
   startedAt?: string;
-  student: { id: string; name: string; email: string };
-  tutor: { id: string; name: string; email: string };
+  student: { id: string; firstName: string; lastName: string; email: string };
+  tutor: { id: string; firstName: string; lastName: string; email: string };
   createdAt: string;
 }
 
@@ -118,7 +120,7 @@ export function AdminMatchingClient() {
 
       if (response.ok) {
         const data = await response.json();
-        setSuccess(`マッチングが作成されました: ${data.pairing.student.name} × ${data.pairing.tutor.name}`);
+        setSuccess(`マッチングが作成されました: ${data.pairing.student.lastName} ${data.pairing.student.firstName} × ${data.pairing.tutor.lastName} ${data.pairing.tutor.firstName}`);
         setSelectedStudent('');
         setSelectedTutor('');
         fetchData(); // データを再取得
@@ -178,7 +180,7 @@ export function AdminMatchingClient() {
                   {getAvailableStudents().map((student) => (
                     <SelectItem key={student.id} value={student.id}>
                       <div className="flex flex-col">
-                        <span>{student.name}</span>
+                        <span>{student.lastName} {student.firstName}</span>
                         <span className="text-xs text-gray-500">
                           {student.interests.length > 0 && `興味: ${student.interests.join(', ')}`}
                         </span>
@@ -202,7 +204,7 @@ export function AdminMatchingClient() {
                   {getAvailableTutors().map((tutor) => (
                     <SelectItem key={tutor.id} value={tutor.id}>
                       <div className="flex flex-col">
-                        <span>{tutor.name}</span>
+                        <span>{tutor.lastName} {tutor.firstName}</span>
                         <span className="text-xs text-gray-500">
                           {tutor.specialties.length > 0 &&
                             `専門: ${tutor.specialties.map(s => specialtyMap[s] || s).join(', ')}`
@@ -252,7 +254,7 @@ export function AdminMatchingClient() {
                       <div className="flex items-center gap-2">
                         <UserCheck className="h-4 w-4 text-green-600" />
                         <span className="font-semibold">
-                          {pairing.student.name} × {pairing.tutor.name}
+                          {pairing.student.lastName} {pairing.student.firstName} × {pairing.tutor.lastName} {pairing.tutor.firstName}
                         </span>
                         <Badge variant={pairing.status === 'ACTIVE' ? 'default' : 'secondary'}>
                           {pairing.status === 'ACTIVE' ? 'アクティブ' : pairing.status}

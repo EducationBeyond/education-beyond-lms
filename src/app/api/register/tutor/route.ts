@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
           branchCode: '',
           accountType: '',
           accountNumber: '',
-          userId: `tutor-${Date.now()}`,
+          userId: user.id, // 作成したUserのIDを参照
         },
       });
 

@@ -1,6 +1,3 @@
-// Education Beyond LMS Database Schema
-// This schema defines all entities and relationships for the LMS platform
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,49 +8,41 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// ============================================================================
-// Auth.js v5 (NextAuth) Standard Models
-// ============================================================================
 model User {
   id            String    @id @default(cuid())
   email         String?   @unique @db.Citext
-  emailVerified DateTime? @map("email_verified") @db.Timestamptz
+  emailVerified DateTime? @map("email_verified") @db.Timestamptz(6)
   name          String?
   image         String?
   passwordHash  String?   @map("password_hash")
-  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz
-
-  // Auth.js relations
-  accounts Account[]
-  sessions Session[]
-
-  // Optional role links (1:1)
-  parent  Parent?
-  tutor   Tutor?
-  admin   Admin?
-  student Student?
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  accounts      Account[]
+  admin         Admin?
+  parent        Parent?
+  sessions      Session[]
+  student       Student?
+  tutor         Tutor?
 
   @@map("users")
 }
 
 model Account {
-  // composite PK (provider, providerAccountId)
-  userId             String   @map("user_id")
+  userId             String  @map("user_id")
   type               String
   provider           String
-  providerAccountId  String   @map("provider_account_id")
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
+  providerAccountId  String  @map("provider_account_id")
+  refresh_token      String?
+  access_token       String?
   expires_at         Int?
   token_type         String?
   scope              String?
-  id_token           String?  @db.Text
+  id_token           String?
   session_state      String?
   oauth_token_secret String?
   oauth_token        String?
+  user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@id([provider, providerAccountId])
   @@map("accounts")
 }
@@ -63,8 +52,8 @@ model Session {
   sessionToken String   @unique @map("session_token")
   userId       String   @map("user_id")
   expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@map("sessions")
 }
 
@@ -77,36 +66,30 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
-// ============================================================================
-// Core User Entities
-// ============================================================================
-
 model Parent {
-  id              String    @id @default(cuid())
-  email           String    @unique @db.Citext
+  id            String    @id @default(cuid())
+  email         String    @unique @db.Citext
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdBy     String?   @map("created_by")
+  updatedBy     String?   @map("updated_by")
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz(6)
+  addressDetail String    @map("address_detail")
+  city          String
+  firstName     String    @map("first_name")
+  firstNameKana String    @map("first_name_kana")
+  lastName      String    @map("last_name")
+  lastNameKana  String    @map("last_name_kana")
+  nameAlphabet  String    @map("name_alphabet")
   /// DEPRECATED: 認証は users.password_hash へ集約予定
-  password        String?
-  lastName        String    @map("last_name")
-  firstName       String    @map("first_name")
-  lastNameKana    String    @map("last_name_kana")
-  firstNameKana   String    @map("first_name_kana")
-  nameAlphabet    String    @map("name_alphabet")
-  phoneNumber     String    @map("phone_number")
-  postalCode      String    @map("postal_code")
-  prefecture      String
-  city            String
-  addressDetail   String    @map("address_detail")
-  userId          String    @unique @map("user_id")
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
-  createdBy       String?   @map("created_by")
-  updatedBy       String?   @map("updated_by")
-  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz
-
-  // Relations
-  user     User      @relation(fields: [userId], references: [id])
-  students Student[]
-  payments Payment[]
+  password      String?
+  phoneNumber   String    @map("phone_number")
+  postalCode    String    @map("postal_code")
+  prefecture    String
+  userId        String    @unique @map("user_id")
+  user          User      @relation(fields: [userId], references: [id])
+  payments      Payment[]
+  students      Student[]
 
   @@index([email])
   @@index([deletedAt])
@@ -114,86 +97,81 @@ model Parent {
 }
 
 model Student {
-  id               String    @id @default(cuid())
-  email            String?   @db.Citext // Optional: 運営側で後から設定
+  id              String           @id @default(cuid())
+  parentId        String           @map("parent_id")
+  birthdate       DateTime         @db.Date
+  gender          Gender
+  interests       String[]
+  cautions        String?
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdBy       String?          @map("created_by")
+  updatedBy       String?          @map("updated_by")
+  deletedAt       DateTime?        @map("deleted_at") @db.Timestamptz(6)
+  email           String?          @unique @db.Citext
+  entryType       String?          @map("entry_type")
+  firstName       String           @map("first_name")
+  firstNameKana   String           @map("first_name_kana")
+  giftedEpisodes  String           @map("gifted_episodes")
+  howDidYouKnow   String?          @map("how_did_you_know")
+  lastName        String           @map("last_name")
+  lastNameKana    String           @map("last_name_kana")
+  nameAlphabet    String           @map("name_alphabet")
   /// DEPRECATED: 認証は users.password_hash へ集約予定
-  password         String?
-  entryType        String?   @map("entry_type") // エントリー種別
-  lastName         String    @map("last_name")
-  firstName        String    @map("first_name")
-  lastNameKana     String    @map("last_name_kana")
-  firstNameKana    String    @map("first_name_kana")
-  nameAlphabet     String    @map("name_alphabet")
-  parentId         String    @map("parent_id")
-  userId           String?   @unique @map("user_id")
-  birthdate        DateTime @db.Date
-  gender           Gender
-  giftedEpisodes   String    @map("gifted_episodes") @db.Text // 特異な才能があると思われるエピソード
-  interests        String[]  // 興味のある分野
-  schoolName       String    @map("school_name")
-  cautions         String?   @db.Text // 生徒注意事項
-  howDidYouKnow    String?   @map("how_did_you_know") // プログラムを知った経緯
-  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz
-  createdBy        String?   @map("created_by")
-  updatedBy        String?   @map("updated_by")
-  deletedAt        DateTime? @map("deleted_at") @db.Timestamptz
-
-  // Relations
-  user            User?            @relation(fields: [userId], references: [id])
-  parent          Parent           @relation(fields: [parentId], references: [id])
+  password        String?
+  schoolName      String           @map("school_name")
+  userId          String?          @unique @map("user_id")
   learningRecords LearningRecord[]
-  reservations    Reservation[]
   pairings        Pairing[]
+  reservations    Reservation[]
+  parent          Parent           @relation(fields: [parentId], references: [id])
+  user            User?            @relation(fields: [userId], references: [id])
 
-  @@unique([email]) // null値は除外してユニーク制約
   @@index([parentId])
   @@index([deletedAt])
   @@map("students")
 }
 
 model Tutor {
-  id                   String    @id @default(cuid())
-  email                String    @unique @db.Citext
+  id                   String           @id @default(cuid())
+  affiliation          String
+  specialties          String[]
+  avatarUrl            String?          @map("avatar_url")
+  createdAt            DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdBy            String?          @map("created_by")
+  updatedBy            String?          @map("updated_by")
+  deletedAt            DateTime?        @map("deleted_at") @db.Timestamptz(6)
+  accountNumber        String           @map("account_number")
+  accountType          String           @map("account_type")
+  addressDetail        String           @map("address_detail")
+  bankCode             String           @map("bank_code")
+  bankName             String           @map("bank_name")
+  branchCode           String           @map("branch_code")
+  branchName           String           @map("branch_name")
+  city                 String
+  education            String
+  email                String           @unique @db.Citext
+  firstName            String           @map("first_name")
+  firstNameKana        String           @map("first_name_kana")
+  interviewCalendarUrl String?          @map("interview_calendar_url")
+  lastName             String           @map("last_name")
+  lastNameKana         String           @map("last_name_kana")
+  lessonCalendarUrl    String?          @map("lesson_calendar_url")
+  nameAlphabet         String           @map("name_alphabet")
+  nearestStation       String           @map("nearest_station")
   /// DEPRECATED: 認証は users.password_hash へ集約予定
   password             String?
-  lastName             String    @map("last_name")
-  firstName            String    @map("first_name")
-  lastNameKana         String    @map("last_name_kana")
-  firstNameKana        String    @map("first_name_kana")
-  nameAlphabet         String    @map("name_alphabet")
-  phoneNumber          String    @map("phone_number")
-  postalCode           String    @map("postal_code")
+  phoneNumber          String           @map("phone_number")
+  postalCode           String           @map("postal_code")
   prefecture           String
-  city                 String
-  addressDetail        String    @map("address_detail")
-  nearestStation       String    @map("nearest_station")
-  affiliation          String
-  education            String    // 学歴
-  specialties          String[]  // 専門分野
-  selfIntroduction     String    @map("self_introduction") @db.Text
-  avatarUrl            String?   @map("avatar_url")
-  bankName             String    @map("bank_name")
-  bankCode             String    @map("bank_code")
-  branchName           String    @map("branch_name")
-  branchCode           String    @map("branch_code")
-  accountType          String    @map("account_type")
-  accountNumber        String    @map("account_number")
-  interviewCalendarUrl String?   @map("interview_calendar_url") // 事前面談用カレンダー
-  lessonCalendarUrl    String?   @map("lesson_calendar_url")    // 研究予約用カレンダー
-  userId               String    @unique @map("user_id")
-  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz
-  createdBy            String?   @map("created_by")
-  updatedBy            String?   @map("updated_by")
-  deletedAt            DateTime? @map("deleted_at") @db.Timestamptz
-
-  // Relations
-  user            User             @relation(fields: [userId], references: [id])
-  learningRecords LearningRecord[]
-  reservations    Reservation[]
-  pairings        Pairing[]
-  availabilities  Availability[]
+  selfIntroduction     String           @map("self_introduction")
+  userId               String           @unique @map("user_id")
+  availabilities       Availability[]
+  learningRecords      LearningRecord[]
+  pairings             Pairing[]
+  reservations         Reservation[]
+  user                 User             @relation(fields: [userId], references: [id])
 
   @@index([email])
   @@index([deletedAt])
@@ -201,51 +179,43 @@ model Tutor {
 }
 
 model Admin {
-  id          String    @id @default(cuid())
-  email       String    @unique @db.Citext
+  id        String    @id @default(cuid())
+  name      String
+  role      AdminRole @default(ADMIN)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdBy String?   @map("created_by")
+  updatedBy String?   @map("updated_by")
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
+  email     String    @unique @db.Citext
   /// DEPRECATED: 認証は users.password_hash へ集約予定
-  password    String?
-  name        String
-  role        AdminRole @default(ADMIN)
-  userId      String?   @unique @map("user_id")
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz
-  createdBy   String?   @map("created_by")
-  updatedBy   String?   @map("updated_by")
-  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz
-
-  // Relations
-  user User? @relation(fields: [userId], references: [id])
+  password  String?
+  userId    String?   @unique @map("user_id")
+  user      User?     @relation(fields: [userId], references: [id])
 
   @@index([email])
   @@index([deletedAt])
   @@map("admins")
 }
 
-// ============================================================================
-// Learning & Reservation Entities
-// ============================================================================
-
 model LearningRecord {
-  id          String    @id @default(cuid())
-  studentId   String    @map("student_id")
-  tutorId     String    @map("tutor_id")
-  date        DateTime  @db.Date
-  summary     String    @db.Text
+  id          String      @id @default(cuid())
+  studentId   String      @map("student_id")
+  tutorId     String      @map("tutor_id")
+  date        DateTime    @db.Date
+  summary     String
   materials   String[]
-  durationMin Int       @map("duration_min")
+  durationMin Int         @map("duration_min")
   score       Int?
   tags        String[]
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz
-  createdBy   String?   @map("created_by")
-  updatedBy   String?   @map("updated_by")
-  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz
-
-  // Relations
-  student    Student     @relation(fields: [studentId], references: [id])
-  tutor      Tutor       @relation(fields: [tutorId], references: [id])
-  driveFiles DriveFile[]
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdBy   String?     @map("created_by")
+  updatedBy   String?     @map("updated_by")
+  deletedAt   DateTime?   @map("deleted_at") @db.Timestamptz(6)
+  driveFiles  DriveFile[]
+  student     Student     @relation(fields: [studentId], references: [id])
+  tutor       Tutor       @relation(fields: [tutorId], references: [id])
 
   @@index([studentId])
   @@index([tutorId])
@@ -255,24 +225,22 @@ model LearningRecord {
 }
 
 model Reservation {
-  id        String             @id @default(cuid())
-  studentId String             @map("student_id")
-  tutorId   String             @map("tutor_id")
-  startAt   DateTime           @map("start_at") @db.Timestamptz
-  endAt     DateTime           @map("end_at") @db.Timestamptz
-  channel   ReservationChannel
-  status    ReservationStatus  @default(PENDING)
-  notes     String?            @db.Text
-  createdAt DateTime           @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt DateTime           @updatedAt @map("updated_at") @db.Timestamptz
-  createdBy String?            @map("created_by")
-  updatedBy String?            @map("updated_by")
-  deletedAt DateTime?          @map("deleted_at") @db.Timestamptz
-
-  // Relations
-  student       Student        @relation(fields: [studentId], references: [id])
-  tutor         Tutor          @relation(fields: [tutorId], references: [id])
+  id            String             @id @default(cuid())
+  studentId     String             @map("student_id")
+  tutorId       String             @map("tutor_id")
+  startAt       DateTime           @map("start_at") @db.Timestamptz(6)
+  endAt         DateTime           @map("end_at") @db.Timestamptz(6)
+  channel       ReservationChannel
+  status        ReservationStatus  @default(PENDING)
+  notes         String?
+  createdAt     DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdBy     String?            @map("created_by")
+  updatedBy     String?            @map("updated_by")
+  deletedAt     DateTime?          @map("deleted_at") @db.Timestamptz(6)
   calendarEvent CalendarEvent?
+  student       Student            @relation(fields: [studentId], references: [id])
+  tutor         Tutor              @relation(fields: [tutorId], references: [id])
 
   @@index([studentId])
   @@index([tutorId])
@@ -287,19 +255,17 @@ model Pairing {
   studentId String        @map("student_id")
   tutorId   String        @map("tutor_id")
   status    PairingStatus @default(PENDING)
-  score     Float? // Match compatibility score (0.0-1.0)
-  startedAt DateTime?     @map("started_at") @db.Timestamptz
-  endedAt   DateTime?     @map("ended_at") @db.Timestamptz
-  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+  score     Float?
+  startedAt DateTime?     @map("started_at") @db.Timestamptz(6)
+  endedAt   DateTime?     @map("ended_at") @db.Timestamptz(6)
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
   createdBy String?       @map("created_by")
   updatedBy String?       @map("updated_by")
-  deletedAt DateTime?     @map("deleted_at") @db.Timestamptz
-
-  // Relations
-  student  Student   @relation(fields: [studentId], references: [id])
-  tutor    Tutor     @relation(fields: [tutorId], references: [id])
-  messages Message[]
+  deletedAt DateTime?     @map("deleted_at") @db.Timestamptz(6)
+  messages  Message[]
+  student   Student       @relation(fields: [studentId], references: [id])
+  tutor     Tutor         @relation(fields: [tutorId], references: [id])
 
   @@unique([studentId, tutorId])
   @@index([studentId])
@@ -312,17 +278,15 @@ model Pairing {
 model Availability {
   id         String    @id @default(cuid())
   tutorId    String    @map("tutor_id")
-  startAt    DateTime  @map("start_at") @db.Timestamptz
-  endAt      DateTime  @map("end_at") @db.Timestamptz
-  recurrence String? // RRULE format for recurring availability
-  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  startAt    DateTime  @map("start_at") @db.Timestamptz(6)
+  endAt      DateTime  @map("end_at") @db.Timestamptz(6)
+  recurrence String?
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
   createdBy  String?   @map("created_by")
   updatedBy  String?   @map("updated_by")
-  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz
-
-  // Relations
-  tutor Tutor @relation(fields: [tutorId], references: [id])
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
+  tutor      Tutor     @relation(fields: [tutorId], references: [id])
 
   @@index([tutorId])
   @@index([startAt])
@@ -330,24 +294,18 @@ model Availability {
   @@map("availabilities")
 }
 
-// ============================================================================
-// External Integration Entities
-// ============================================================================
-
 model CalendarEvent {
   id            String           @id @default(cuid())
   reservationId String           @unique @map("reservation_id")
   provider      ExternalProvider
   externalId    String           @map("external_id")
   joinUrl       String?          @map("join_url")
-  createdAt     DateTime         @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt     DateTime         @updatedAt @map("updated_at") @db.Timestamptz
+  createdAt     DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
   createdBy     String?          @map("created_by")
   updatedBy     String?          @map("updated_by")
-  deletedAt     DateTime?        @map("deleted_at") @db.Timestamptz
-
-  // Relations
-  reservation Reservation @relation(fields: [reservationId], references: [id])
+  deletedAt     DateTime?        @map("deleted_at") @db.Timestamptz(6)
+  reservation   Reservation      @relation(fields: [reservationId], references: [id])
 
   @@unique([provider, externalId])
   @@index([provider])
@@ -365,14 +323,12 @@ model DriveFile {
   ownerType        FileOwnerType    @map("owner_type")
   scope            FileScope
   learningRecordId String?          @map("learning_record_id")
-  createdAt        DateTime         @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt        DateTime         @updatedAt @map("updated_at") @db.Timestamptz
+  createdAt        DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
   createdBy        String?          @map("created_by")
   updatedBy        String?          @map("updated_by")
-  deletedAt        DateTime?        @map("deleted_at") @db.Timestamptz
-
-  // Relations
-  learningRecord LearningRecord? @relation(fields: [learningRecordId], references: [id])
+  deletedAt        DateTime?        @map("deleted_at") @db.Timestamptz(6)
+  learningRecord   LearningRecord?  @relation(fields: [learningRecordId], references: [id])
 
   @@unique([provider, externalId])
   @@index([ownerId, ownerType])
@@ -390,16 +346,14 @@ model Payment {
   amount     Decimal          @db.Decimal(10, 2)
   currency   String           @default("JPY")
   status     PaymentStatus    @default(PENDING)
-  receivedAt DateTime?        @map("received_at") @db.Timestamptz
+  receivedAt DateTime?        @map("received_at") @db.Timestamptz(6)
   dueDate    DateTime?        @map("due_date") @db.Date
-  createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt  DateTime         @updatedAt @map("updated_at") @db.Timestamptz
+  createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
   createdBy  String?          @map("created_by")
   updatedBy  String?          @map("updated_by")
-  deletedAt  DateTime?        @map("deleted_at") @db.Timestamptz
-
-  // Relations
-  parent Parent @relation(fields: [parentId], references: [id])
+  deletedAt  DateTime?        @map("deleted_at") @db.Timestamptz(6)
+  parent     Parent           @relation(fields: [parentId], references: [id])
 
   @@unique([provider, externalId])
   @@index([parentId])
@@ -417,11 +371,11 @@ model CRMContact {
   entityType CRMEntityType    @map("entity_type")
   entityId   String           @map("entity_id")
   email      String           @db.Citext
-  createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt  DateTime         @updatedAt @map("updated_at") @db.Timestamptz
+  createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
   createdBy  String?          @map("created_by")
   updatedBy  String?          @map("updated_by")
-  deletedAt  DateTime?        @map("deleted_at") @db.Timestamptz
+  deletedAt  DateTime?        @map("deleted_at") @db.Timestamptz(6)
 
   @@unique([provider, externalId])
   @@unique([entityType, entityId])
@@ -437,11 +391,11 @@ model MessageLink {
   channelUrl String            @map("channel_url")
   entityType MessageEntityType @map("entity_type")
   entityId   String            @map("entity_id")
-  createdAt  DateTime          @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt  DateTime          @updatedAt @map("updated_at") @db.Timestamptz
+  createdAt  DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
   createdBy  String?           @map("created_by")
   updatedBy  String?           @map("updated_by")
-  deletedAt  DateTime?         @map("deleted_at") @db.Timestamptz
+  deletedAt  DateTime?         @map("deleted_at") @db.Timestamptz(6)
 
   @@unique([provider, externalId])
   @@index([entityType, entityId])
@@ -449,27 +403,21 @@ model MessageLink {
   @@map("message_links")
 }
 
-// ============================================================================
-// Messaging System
-// ============================================================================
-
 model Message {
-  id           String         @id @default(cuid())
-  pairingId    String         @map("pairing_id")
-  senderId     String         @map("sender_id")
-  senderType   MessageSender  @map("sender_type")
-  content      String         @db.Text
-  messageType  MessageType    @map("message_type") @default(TEXT)
-  status       MessageStatus  @default(SENT)
-  externalId   String?        @map("external_id") // LINE/Slack message ID
-  threadId     String?        @map("thread_id")   // スレッド管理用
-  readAt       DateTime?      @map("read_at") @db.Timestamptz
-  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt    DateTime       @updatedAt @map("updated_at") @db.Timestamptz
-  deletedAt    DateTime?      @map("deleted_at") @db.Timestamptz
-
-  // Relations
-  pairing Pairing @relation(fields: [pairingId], references: [id])
+  id          String        @id @default(cuid())
+  pairingId   String        @map("pairing_id")
+  senderId    String        @map("sender_id")
+  senderType  MessageSender @map("sender_type")
+  content     String
+  messageType MessageType   @default(TEXT) @map("message_type")
+  status      MessageStatus @default(SENT)
+  externalId  String?       @map("external_id")
+  threadId    String?       @map("thread_id")
+  readAt      DateTime?     @map("read_at") @db.Timestamptz(6)
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime?     @map("deleted_at") @db.Timestamptz(6)
+  pairing     Pairing       @relation(fields: [pairingId], references: [id])
 
   @@index([pairingId])
   @@index([senderId, senderType])
@@ -482,14 +430,14 @@ model Message {
 model ExternalAccount {
   id         String           @id @default(cuid())
   userId     String           @map("user_id")
-  userType   UserType         @map("user_type") // STUDENT or TUTOR
+  userType   UserType         @map("user_type")
   provider   ExternalProvider
-  externalId String           @map("external_id") // LINE user ID or Slack user ID
-  channelId  String?          @map("channel_id")  // Slack channel ID
+  externalId String           @map("external_id")
+  channelId  String?          @map("channel_id")
   isActive   Boolean          @default(true) @map("is_active")
-  createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt  DateTime         @updatedAt @map("updated_at") @db.Timestamptz
-  deletedAt  DateTime?        @map("deleted_at") @db.Timestamptz
+  createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt  DateTime?        @map("deleted_at") @db.Timestamptz(6)
 
   @@unique([provider, externalId])
   @@unique([userId, userType, provider])
@@ -498,10 +446,6 @@ model ExternalAccount {
   @@index([deletedAt])
   @@map("external_accounts")
 }
-
-// ============================================================================
-// Enums
-// ============================================================================
 
 enum Gender {
   MALE

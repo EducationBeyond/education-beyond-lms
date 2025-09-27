@@ -11,7 +11,8 @@ import { Badge } from '@/components/ui/badge';
 interface Tutor {
   id: string;
   email: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   furigana?: string;
   affiliation?: string;
   address?: string;
@@ -141,7 +142,7 @@ export function StudentAssignedTutorClient() {
                   <Image
                     className="h-16 w-16 rounded-full object-cover"
                     src={tutor.avatarUrl}
-                    alt={tutor.name}
+                    alt={`${tutor.lastName} ${tutor.firstName}`}
                     width={64}
                     height={64}
                   />
@@ -152,7 +153,7 @@ export function StudentAssignedTutorClient() {
                 )}
               </div>
               <div className="flex-1">
-                <h3 className="text-xl font-semibold text-gray-900">{tutor.name}</h3>
+                <h3 className="text-xl font-semibold text-gray-900">{tutor.lastName} {tutor.firstName}</h3>
                 {tutor.furigana && (
                   <p className="text-sm text-gray-500">{tutor.furigana}</p>
                 )}

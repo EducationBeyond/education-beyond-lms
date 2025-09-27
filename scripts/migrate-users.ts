@@ -76,7 +76,7 @@ async function migrateUsers() {
       const user = await prisma.user.create({
         data: {
           email: tutor.email,
-          name: tutor.name,
+          name: `${tutor.lastName} ${tutor.firstName}`,
           passwordHash: tutor.password,
         },
       });
