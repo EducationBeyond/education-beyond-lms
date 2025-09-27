@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ProfileForm } from '@/components/profile/profile-form';
 import { GoogleLink } from '@/components/auth/google-link';
+import { PasswordProtection } from '@/components/profile/password-protection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface StudentProfileClientProps {
@@ -10,6 +11,17 @@ interface StudentProfileClientProps {
 }
 
 export function StudentProfileClient({ initialData }: StudentProfileClientProps) {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const handleAuthenticated = () => {
+    setIsAuthenticated(true);
+  };
+
+  // パスワード認証が済んでいない場合はパスワード画面を表示
+  if (!isAuthenticated) {
+    return <PasswordProtection onAuthenticated={handleAuthenticated} />;
+  }
+
   const handleStudentSubmit = async (data: any) => {
     const response = await fetch('/api/profile/student', {
       method: 'PUT',

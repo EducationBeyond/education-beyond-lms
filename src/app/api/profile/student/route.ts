@@ -1,10 +1,8 @@
 import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { getUserRole } from '@/lib/user-role';
 import { studentProfileSchema } from '@/lib/validation/profile-schemas';
-
-const prisma = new PrismaClient();
 
 export async function PUT(request: NextRequest) {
   try {
