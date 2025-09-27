@@ -293,12 +293,13 @@ async function main() {
       tutorId: tutor1.id,
       date: new Date("2025-09-13"),
       summary: "二次方程式の解き方を学習しました。判別式の使い方について理解が深まりました。",
-      materials: ["教科書 数学I 第3章", "問題集 応用編 p.45-50"],
       durationMin: 90,
-      score: 4,
-      tags: ["mathematics", "quadratic-equation", "discriminant"],
-      createdBy: "system",
-      updatedBy: "system",
+      goodPoints: "積極的に質問をして、理解しようとする姿勢が素晴らしかったです。特に判別式の概念について、自分なりに例を考えて説明できていました。",
+      improvementPoints: "計算ミスが数回見られました。次回は計算の途中過程をもう少し丁寧に書くように心がけましょう。",
+      homework: "教科書p.67の練習問題1-10を解いてきてください。特に問題5,8は応用問題なので、しっかり考えて取り組んでください。",
+      studentLate: false,
+      tutorLate: false,
+      additionalNotes: "次回は因数分解の復習から始めて、二次方程式の解の公式に進む予定です。",
     },
   });
 
