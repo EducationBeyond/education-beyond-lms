@@ -297,8 +297,9 @@ model Pairing {
   deletedAt DateTime?     @map("deleted_at") @db.Timestamptz
 
   // Relations
-  student Student @relation(fields: [studentId], references: [id])
-  tutor   Tutor   @relation(fields: [tutorId], references: [id])
+  student  Student   @relation(fields: [studentId], references: [id])
+  tutor    Tutor     @relation(fields: [tutorId], references: [id])
+  messages Message[]
 
   @@unique([studentId, tutorId])
   @@index([studentId])
@@ -449,6 +450,56 @@ model MessageLink {
 }
 
 // ============================================================================
+// Messaging System
+// ============================================================================
+
+model Message {
+  id           String         @id @default(cuid())
+  pairingId    String         @map("pairing_id")
+  senderId     String         @map("sender_id")
+  senderType   MessageSender  @map("sender_type")
+  content      String         @db.Text
+  messageType  MessageType    @map("message_type") @default(TEXT)
+  status       MessageStatus  @default(SENT)
+  externalId   String?        @map("external_id") // LINE/Slack message ID
+  threadId     String?        @map("thread_id")   // スレッド管理用
+  readAt       DateTime?      @map("read_at") @db.Timestamptz
+  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt    DateTime?      @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  pairing Pairing @relation(fields: [pairingId], references: [id])
+
+  @@index([pairingId])
+  @@index([senderId, senderType])
+  @@index([createdAt])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("messages")
+}
+
+model ExternalAccount {
+  id         String           @id @default(cuid())
+  userId     String           @map("user_id")
+  userType   UserType         @map("user_type") // STUDENT or TUTOR
+  provider   ExternalProvider
+  externalId String           @map("external_id") // LINE user ID or Slack user ID
+  channelId  String?          @map("channel_id")  // Slack channel ID
+  isActive   Boolean          @default(true) @map("is_active")
+  createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime         @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt  DateTime?        @map("deleted_at") @db.Timestamptz
+
+  @@unique([provider, externalId])
+  @@unique([userId, userType, provider])
+  @@index([userId, userType])
+  @@index([provider])
+  @@index([deletedAt])
+  @@map("external_accounts")
+}
+
+// ============================================================================
 // Enums
 // ============================================================================
 
@@ -521,4 +572,29 @@ enum CRMEntityType {
 enum MessageEntityType {
   PARENT
   TUTOR
+}
+
+enum MessageSender {
+  STUDENT
+  TUTOR
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  SYSTEM
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+enum UserType {
+  STUDENT
+  TUTOR
+  PARENT
 }
