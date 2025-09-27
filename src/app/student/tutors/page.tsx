@@ -11,8 +11,10 @@ import { Button } from '@/components/ui/button';
 interface Tutor {
   id: string;
   email: string;
-  name: string;
-  furigana?: string;
+  firstName: string;
+  lastName: string;
+  firstNameKana: string;
+  lastNameKana: string;
   affiliation?: string;
   specialties: string[];
   avatarUrl?: string;
@@ -30,6 +32,14 @@ const specialtyMap: Record<string, string> = {
   biology: '生物',
   history: '歴史',
   geography: '地理',
+};
+
+const getTutorDisplayName = (tutor: Tutor) => {
+  return `${tutor.lastName} ${tutor.firstName}`;
+};
+
+const getTutorKanaName = (tutor: Tutor) => {
+  return `${tutor.lastNameKana} ${tutor.firstNameKana}`;
 };
 
 export default function StudentTutorsPage() {
@@ -87,9 +97,15 @@ export default function StudentTutorsPage() {
   // フィルタリング
   const filteredTutors = tutors.filter(tutor => {
     const searchLower = searchTerm.toLowerCase();
+    const fullName = getTutorDisplayName(tutor);
+    const kanaName = getTutorKanaName(tutor);
     return (
-      tutor.name.toLowerCase().includes(searchLower) ||
-      tutor.furigana?.toLowerCase().includes(searchLower) ||
+      fullName.toLowerCase().includes(searchLower) ||
+      tutor.firstName.toLowerCase().includes(searchLower) ||
+      tutor.lastName.toLowerCase().includes(searchLower) ||
+      kanaName.toLowerCase().includes(searchLower) ||
+      tutor.firstNameKana.toLowerCase().includes(searchLower) ||
+      tutor.lastNameKana.toLowerCase().includes(searchLower) ||
       tutor.affiliation?.toLowerCase().includes(searchLower) ||
       tutor.specialties.some(specialty =>
         (specialtyMap[specialty] || specialty).toLowerCase().includes(searchLower)
@@ -182,7 +198,7 @@ export default function StudentTutorsPage() {
                           <img
                             className="h-12 w-12 rounded-full object-cover"
                             src={tutor.avatarUrl}
-                            alt={tutor.name}
+                            alt={getTutorDisplayName(tutor)}
                           />
                         ) : (
                           <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
@@ -190,10 +206,8 @@ export default function StudentTutorsPage() {
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <CardTitle className="text-lg truncate">{tutor.name}</CardTitle>
-                          {tutor.furigana && (
-                            <p className="text-sm text-gray-500 truncate">{tutor.furigana}</p>
-                          )}
+                          <CardTitle className="text-lg truncate">{getTutorDisplayName(tutor)}</CardTitle>
+                          <p className="text-sm text-gray-500 truncate">{getTutorKanaName(tutor)}</p>
                         </div>
                       </div>
                     </CardHeader>

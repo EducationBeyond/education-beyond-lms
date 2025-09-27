@@ -27,13 +27,23 @@ export async function GET(
       select: {
         id: true,
         email: true,
-        name: true,
-        furigana: true,
+        firstName: true,
+        lastName: true,
+        firstNameKana: true,
+        lastNameKana: true,
         affiliation: true,
-        address: true,
+        postalCode: true,
+        prefecture: true,
+        city: true,
+        addressDetail: true,
         specialties: true,
         avatarUrl: true,
-        bankAccountInfo: true,
+        bankName: true,
+        bankCode: true,
+        branchName: true,
+        branchCode: true,
+        accountType: true,
+        accountNumber: true,
         interviewCalendarUrl: true,
         lessonCalendarUrl: true,
         createdAt: true,
@@ -45,10 +55,10 @@ export async function GET(
       return NextResponse.json({ error: 'Tutor not found' }, { status: 404 });
     }
 
-    console.log('[API Tutor Detail] Found tutor:', tutor.name);
+    console.log('[API Tutor Detail] Found tutor:', `${tutor.lastName} ${tutor.firstName}`);
 
     // 機密情報（銀行口座情報）は除外してレスポンス
-    const { bankAccountInfo, ...tutorData } = tutor;
+    const { bankName, bankCode, branchName, branchCode, accountType, accountNumber, ...tutorData } = tutor;
 
     // リクエストしたユーザーがstudentの場合、マッチング情報も取得
     let pairing = null;

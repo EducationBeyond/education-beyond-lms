@@ -12,14 +12,33 @@ import { Mail, AlertCircle, CheckCircle } from 'lucide-react';
 
 interface User {
   id: string;
-  name: string;
+  firstName?: string;
+  lastName?: string;
+  name?: string; // Admin用
   email: string | null; // 参加者の場合はnullの可能性
   role: 'STUDENT' | 'PARENT' | 'TUTOR' | 'ADMIN';
   createdAt: string;
-  parent?: { name: string };
-  students?: { name: string }[];
+  parent?: { firstName: string; lastName: string };
+  students?: { firstName: string; lastName: string }[];
   affiliation?: string;
 }
+
+const getUserDisplayName = (user: User) => {
+  if (user.role === 'ADMIN') {
+    return user.name || '名前未設定';
+  }
+  return user.firstName && user.lastName
+    ? `${user.firstName} ${user.lastName}`
+    : '名前未設定';
+};
+
+const getParentDisplayName = (parent: { firstName: string; lastName: string }) => {
+  return `${parent.firstName} ${parent.lastName}`;
+};
+
+const getStudentDisplayName = (student: { firstName: string; lastName: string }) => {
+  return `${student.firstName} ${student.lastName}`;
+};
 
 export function AdminUsersClient() {
   const [users, setUsers] = useState<User[]>([]);
@@ -174,7 +193,7 @@ export function AdminUsersClient() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <CardTitle className="text-lg">{user.name}</CardTitle>
+                    <CardTitle className="text-lg">{getUserDisplayName(user)}</CardTitle>
                     <CardDescription>
                       {user.email || (user.role === 'STUDENT' ? '未設定' : '不明')}
                     </CardDescription>
@@ -209,14 +228,14 @@ export function AdminUsersClient() {
                   {user.role === 'STUDENT' && user.parent && (
                     <p>
                       <span className="font-medium">保護者: </span>
-                      {user.parent.name}
+                      {getParentDisplayName(user.parent)}
                     </p>
                   )}
 
                   {user.role === 'PARENT' && user.students && user.students.length > 0 && (
                     <p>
                       <span className="font-medium">お子様: </span>
-                      {user.students.map(s => s.name).join(', ')}
+                      {user.students.map(s => getStudentDisplayName(s)).join(', ')}
                     </p>
                   )}
 

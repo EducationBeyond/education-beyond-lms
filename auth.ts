@@ -15,7 +15,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      allowDangerousEmailAccountLinking: false, // 自動アカウントリンクを無効化
+      allowDangerousEmailAccountLinking: true, // 既存ユーザーへのGoogle OAuth紐づけを許可
     }),
     Credentials({
       name: "credentials",
@@ -45,6 +45,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (account?.provider === 'google' && profile?.email) {
         console.log('[NextAuth] Google OAuth sign in attempt for:', profile.email);
 
+        // 組織ドメインのメールアドレスのみ許可
+        if (!profile.email.endsWith('@education-beyond.org')) {
+          console.log('[NextAuth] Email domain not allowed:', profile.email);
+          return false;
+        }
+
         // Google OAuthでは既存ユーザーとの連携のみ許可
         // 新規ユーザー作成は許可しない
         const existingUser = await prisma.user.findUnique({
@@ -54,8 +60,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!existingUser) {
           // 既存ユーザーが見つからない場合は認証を拒否
           console.log('[NextAuth] User not found in database, rejecting sign in:', profile.email);
-          // NextAuthは特定のエラーメッセージを表示する機能がないため、
-          // サインインを拒否し、クライアント側でエラーハンドリングを行う
           return false;
         }
 

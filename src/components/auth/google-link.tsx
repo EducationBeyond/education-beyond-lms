@@ -74,7 +74,7 @@ export function GoogleLink({ userEmail, isLinked = false }: GoogleLinkProps) {
         )}
 
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-3 border rounded-lg">
+          <div className="flex flex-wrap items-center justify-between gap-2 p-3 border rounded-lg">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
                 <svg className="w-4 h-4 text-white" viewBox="0 0 24 24">
@@ -93,7 +93,7 @@ export function GoogleLink({ userEmail, isLinked = false }: GoogleLinkProps) {
             </div>
             <div className="flex items-center gap-2">
               {isGoogleLinked ? (
-                <Badge className="bg-green-100 text-green-800">
+                <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
                   <CheckCircle className="h-3 w-3 mr-1" />
                   連携済み
                 </Badge>

@@ -125,7 +125,7 @@ model Student {
   firstNameKana    String    @map("first_name_kana")
   nameAlphabet     String    @map("name_alphabet")
   parentId         String    @map("parent_id")
-  userId           String    @unique @map("user_id")
+  userId           String?   @unique @map("user_id")
   birthdate        DateTime @db.Date
   gender           Gender
   giftedEpisodes   String    @map("gifted_episodes") @db.Text // 特異な才能があると思われるエピソード
@@ -140,7 +140,7 @@ model Student {
   deletedAt        DateTime? @map("deleted_at") @db.Timestamptz
 
   // Relations
-  user            User             @relation(fields: [userId], references: [id])
+  user            User?            @relation(fields: [userId], references: [id])
   parent          Parent           @relation(fields: [parentId], references: [id])
   learningRecords LearningRecord[]
   reservations    Reservation[]

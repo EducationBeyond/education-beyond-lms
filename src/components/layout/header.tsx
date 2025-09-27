@@ -5,10 +5,11 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import { Menu, X, User } from 'lucide-react';
-
+import Image from 'next/image';
 export function Header() {
   const { data: session, status } = useSession();
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
@@ -16,33 +17,46 @@ export function Header() {
   };
 
   useEffect(() => {
-    const fetchUserRole = async () => {
+    const fetchUserInfo = async () => {
       console.log('[Header] useEffect triggered, session:', !!session, 'email:', session?.user?.email);
       if (session?.user?.email) {
         try {
-          console.log('[Header] Fetching role for:', session.user.email);
-          const response = await fetch('/api/user/role', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: session.user.email }),
-          });
-          if (response.ok) {
-            const { role } = await response.json();
+          // ロールと表示名を同時に取得
+          const [roleResponse, displayNameResponse] = await Promise.all([
+            fetch('/api/user/role', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: session.user.email }),
+            }),
+            fetch('/api/user/display-name')
+          ]);
+
+          if (roleResponse.ok) {
+            const { role } = await roleResponse.json();
             console.log('[Header] Role fetched successfully:', role);
             setUserRole(role);
           } else {
-            console.error('[Header] Failed to fetch role:', response.status);
+            console.error('[Header] Failed to fetch role:', roleResponse.status);
+          }
+
+          if (displayNameResponse.ok) {
+            const { displayName } = await displayNameResponse.json();
+            console.log('[Header] Display name fetched successfully:', displayName);
+            setDisplayName(displayName);
+          } else {
+            console.error('[Header] Failed to fetch display name:', displayNameResponse.status);
           }
         } catch (error) {
-          console.error('[Header] Failed to fetch user role:', error);
+          console.error('[Header] Failed to fetch user info:', error);
         }
       } else {
-        console.log('[Header] No session or email, clearing role');
+        console.log('[Header] No session or email, clearing user info');
         setUserRole(null);
+        setDisplayName(null);
       }
     };
 
-    fetchUserRole();
+    fetchUserInfo();
   }, [session]);
 
   const getNavigationItems = () => {
@@ -115,10 +129,12 @@ export function Header() {
                 <div className="flex items-center space-x-2">
                   <div className="flex items-center space-x-2">
                     {session.user.image ? (
-                      <img
+                      <Image
                         className="h-8 w-8 rounded-full"
                         src={session.user.image}
                         alt={session.user.name || 'User'}
+                        width={32}
+                        height={32}
                       />
                     ) : (
                       <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
@@ -127,7 +143,7 @@ export function Header() {
                     )}
                     <div className="hidden sm:block">
                       <p className="text-sm font-medium text-gray-700">
-                        {session.user.name}
+                        {displayName || session.user.name || '名前未設定'}
                       </p>
                     </div>
                   </div>

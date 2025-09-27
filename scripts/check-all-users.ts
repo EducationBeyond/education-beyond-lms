@@ -27,9 +27,9 @@ async function checkAllUsers() {
       const userWithRoles = await prisma.user.findUnique({
         where: { id: user.id },
         include: {
-          student: { select: { id: true, name: true } },
-          parent: { select: { id: true, name: true } },
-          tutor: { select: { id: true, name: true } },
+          student: { select: { id: true, firstName: true, lastName: true } },
+          parent: { select: { id: true, firstName: true, lastName: true } },
+          tutor: { select: { id: true, firstName: true, lastName: true } },
           admin: { select: { id: true, name: true } }
         }
       });
@@ -50,9 +50,9 @@ async function checkAllUsers() {
     const userFromLogs = await prisma.user.findUnique({
       where: { id: userIdFromLogs },
       include: {
-        student: { select: { id: true, name: true } },
-        parent: { select: { id: true, name: true } },
-        tutor: { select: { id: true, name: true } },
+        student: { select: { id: true, firstName: true, lastName: true } },
+        parent: { select: { id: true, firstName: true, lastName: true } },
+        tutor: { select: { id: true, firstName: true, lastName: true } },
         admin: { select: { id: true, name: true } }
       }
     });

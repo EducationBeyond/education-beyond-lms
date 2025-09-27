@@ -56,7 +56,7 @@ export async function PATCH(
       const user = await tx.user.create({
         data: {
           email: email,
-          name: existingStudent.name,
+          name: `${existingStudent.firstName} ${existingStudent.lastName}`,
           emailVerified: new Date(), // Google OAuth用に認証済みにする
         },
       });
@@ -73,7 +73,8 @@ export async function PATCH(
           parent: {
             select: {
               id: true,
-              name: true,
+              firstName: true,
+              lastName: true,
               email: true,
             }
           }
@@ -87,11 +88,12 @@ export async function PATCH(
       success: true,
       student: {
         id: updatedStudent.id,
-        name: updatedStudent.name,
+        firstName: updatedStudent.firstName,
+        lastName: updatedStudent.lastName,
         email: updatedStudent.email,
         parent: updatedStudent.parent,
       },
-      message: `参加者「${updatedStudent.name}」のGoogleメールアドレス「${email}」を設定しました。参加者本人がGoogle OAuthでログインできるようになりました。`,
+      message: `参加者「${updatedStudent.firstName} ${updatedStudent.lastName}」のGoogleメールアドレス「${email}」を設定しました。参加者本人がGoogle OAuthでログインできるようになりました。`,
     });
 
   } catch (error) {

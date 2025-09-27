@@ -13,34 +13,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { TagInput } from '@/components/ui/tag-input';
-
-export const studentProfileSchema = z.object({
-  name: z.string().min(1, '名前は必須です'),
-  furigana: z.string().optional(),
-  address: z.string().optional(),
-  birthdate: z.string().optional(),
-  gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
-  giftedTraits: z.array(z.string()).optional(),
-  interests: z.array(z.string()).optional(),
-  cautions: z.string().optional(),
-});
-
-export const parentProfileSchema = z.object({
-  name: z.string().min(1, '名前は必須です'),
-  address: z.string().optional(),
-});
-
-export const tutorProfileSchema = z.object({
-  name: z.string().min(1, '名前は必須です'),
-  furigana: z.string().optional(),
-  address: z.string().optional(),
-  affiliation: z.string().optional(),
-  specialties: z.array(z.string()).optional(),
-  avatarUrl: z.string().optional(),
-  bankAccountInfo: z.string().optional(),
-  interviewCalendarUrl: z.string().url('有効なURLを入力してください').optional().or(z.literal('')),
-  lessonCalendarUrl: z.string().url('有効なURLを入力してください').optional().or(z.literal('')),
-});
+import {
+  studentProfileSchema,
+  parentProfileSchema,
+  tutorProfileSchema,
+  type StudentProfileFormData,
+  type ParentProfileFormData,
+  type TutorProfileFormData
+} from '@/lib/validation/profile-schemas';
 
 interface ProfileFormProps {
   role: 'STUDENT' | 'PARENT' | 'TUTOR';
@@ -126,92 +106,173 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>姓</FormLabel>
+                    <FormControl>
+                      <Input placeholder="姓を入力" {...field} value={field.value || ''} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>名</FormLabel>
+                    <FormControl>
+                      <Input placeholder="名を入力" {...field} value={field.value || ''} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="lastNameKana"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>姓（ふりがな）</FormLabel>
+                    <FormControl>
+                      <Input placeholder="せい" {...field} value={field.value || ''} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="firstNameKana"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>名（ふりがな）</FormLabel>
+                    <FormControl>
+                      <Input placeholder="なまえ" {...field} value={field.value || ''} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <FormField
               control={form.control}
-              name="name"
+              name="nameAlphabet"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>名前</FormLabel>
+                  <FormLabel>氏名（アルファベット）</FormLabel>
                   <FormControl>
-                    <Input placeholder="名前を入力" {...field} value={field.value || ''} />
+                    <Input placeholder="Taro Yamada" {...field} value={field.value || ''} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {(role === 'STUDENT' || role === 'TUTOR') && (
-              <FormField
-                control={form.control}
-                name="furigana"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>ふりがな</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="ふりがなを入力"
-                        {...field}
-                        value={field.value || ''}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-
-            {(role === 'STUDENT' || role === 'TUTOR' || role === 'PARENT') && (
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>住所</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="住所を入力"
-                        {...field}
-                        value={field.value || ''}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-
-            {role === 'STUDENT' && (
+            {role === 'PARENT' && (
               <>
                 <FormField
                   control={form.control}
-                  name="birthdate"
+                  name="phoneNumber"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>誕生日</FormLabel>
+                      <FormLabel>電話番号</FormLabel>
                       <FormControl>
-                        <Input type="date" {...field} value={field.value || ''} />
+                        <Input placeholder="090-1234-5678" {...field} value={field.value || ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="postalCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>郵便番号</FormLabel>
+                        <FormControl>
+                          <Input placeholder="123-4567" {...field} value={field.value || ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="prefecture"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>都道府県</FormLabel>
+                        <FormControl>
+                          <Input placeholder="東京都" {...field} value={field.value || ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>市区町村</FormLabel>
+                        <FormControl>
+                          <Input placeholder="渋谷区" {...field} value={field.value || ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="addressDetail"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>それ以下の住所</FormLabel>
+                        <FormControl>
+                          <Input placeholder="道玄坂1-2-3" {...field} value={field.value || ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </>
+            )}
+
+
+            {role === 'STUDENT' && (
+              <>
                 <FormField
                   control={form.control}
-                  name="gender"
+                  name="entryType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>性別</FormLabel>
+                      <FormLabel>エントリー種別</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="性別を選択" />
+                            <SelectValue placeholder="エントリー種別を選択" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="MALE">男性</SelectItem>
-                          <SelectItem value="FEMALE">女性</SelectItem>
-                          <SelectItem value="OTHER">その他</SelectItem>
+                          <SelectItem value="standard">スタンダード</SelectItem>
+                          <SelectItem value="nagano">長野</SelectItem>
+                          <SelectItem value="hiroshima">広島</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -219,18 +280,98 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
                   )}
                 />
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="birthdate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>生年月日</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} value={field.value || ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="gender"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>性別</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="性別を選択" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="MALE">男性</SelectItem>
+                            <SelectItem value="FEMALE">女性</SelectItem>
+                            <SelectItem value="OTHER">その他</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="schoolName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>学校名</FormLabel>
+                        <FormControl>
+                          <Input placeholder="○○小学校" {...field} value={field.value || ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="howDidYouKnow"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>プログラムを知った経緯</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="選択してください" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="search">インターネット検索</SelectItem>
+                            <SelectItem value="sns">SNS</SelectItem>
+                            <SelectItem value="friend">知人の紹介</SelectItem>
+                            <SelectItem value="school">学校</SelectItem>
+                            <SelectItem value="event">イベント</SelectItem>
+                            <SelectItem value="other">その他</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
-                  name="giftedTraits"
+                  name="giftedEpisodes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>ギフテッド特性</FormLabel>
+                      <FormLabel>特異な才能があると思われるエピソード</FormLabel>
                       <FormControl>
-                        <TagInput
-                          value={field.value || []}
-                          onChange={field.onChange}
-                          placeholder="特性を追加..."
-                          suggestions={['記憶力', '集中力', '論理的思考力', '創造性', '言語能力', '数学的能力', '芸術的才能', 'リーダーシップ']}
+                        <Textarea
+                          placeholder="お子様の特異な才能を示すエピソードがあれば記入してください"
+                          {...field}
+                          value={field.value || ''}
                         />
                       </FormControl>
                       <FormMessage />
@@ -243,13 +384,13 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
                   name="interests"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>興味分野</FormLabel>
+                      <FormLabel>興味のある分野</FormLabel>
                       <FormControl>
                         <TagInput
                           value={field.value || []}
                           onChange={field.onChange}
                           placeholder="興味のある分野を追加..."
-                          suggestions={['数学', '英語', '理科', '国語', '社会', '物理', '化学', '生物', '歴史', '地理', 'プログラミング', '美術', '音楽']}
+                          suggestions={['生き物', '植物', '食べ物・料理', '社会・くらし', '歴史', '恭竜・化石', '科学・化学', '地球・宇宙', '音・光', '算数・図形', '工作・美術', '乗り物・機械', '音楽・映像', '言語・物語', '心・思想', 'からだ・健康', '環境・SDGs', 'プログラミング', 'その他']}
                         />
                       </FormControl>
                       <FormMessage />
@@ -262,10 +403,10 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
                   name="cautions"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>気をつけること</FormLabel>
+                      <FormLabel>注意事項</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="アレルギーや特記事項があれば記入"
+                          placeholder="アレルギーや学習上の配慮事項があれば記入してください"
                           {...field}
                           value={field.value || ''}
                         />

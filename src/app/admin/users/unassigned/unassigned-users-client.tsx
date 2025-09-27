@@ -31,7 +31,8 @@ type UnassignedUser = {
 
 type Parent = {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
 };
 
@@ -152,7 +153,7 @@ export function UnassignedUsersClient({ unassignedUsers: initialUsers, parents }
                   <SelectContent>
                     {parents.map((parent) => (
                       <SelectItem key={parent.id} value={parent.id}>
-                        {parent.name} ({parent.email})
+                        {parent.firstName} {parent.lastName} ({parent.email})
                       </SelectItem>
                     ))}
                   </SelectContent>

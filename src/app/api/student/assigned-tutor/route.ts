@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     // 参加者の情報を取得
     const student = await prisma.student.findUnique({
       where: { email: session.user.email },
-      select: { id: true, name: true, email: true }
+      select: { id: true, firstName: true, lastName: true, email: true }
     });
 
     if (!student) {
@@ -42,10 +42,15 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             email: true,
-            name: true,
-            furigana: true,
+            firstName: true,
+            lastName: true,
+            firstNameKana: true,
+            lastNameKana: true,
             affiliation: true,
-            address: true,
+            postalCode: true,
+            prefecture: true,
+            city: true,
+            addressDetail: true,
             specialties: true,
             avatarUrl: true,
             lessonCalendarUrl: true,
@@ -67,7 +72,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    console.log('[Student Assigned Tutor] Found assigned tutor:', activePairing.tutor.name);
+    console.log('[Student Assigned Tutor] Found assigned tutor:', `${activePairing.tutor.lastName} ${activePairing.tutor.firstName}`);
 
     return NextResponse.json({
       pairing: {

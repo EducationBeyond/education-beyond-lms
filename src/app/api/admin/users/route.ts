@@ -28,25 +28,28 @@ export async function GET(request: NextRequest) {
         prisma.student.findMany({
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
             createdAt: true,
-            parent: { select: { name: true } }
+            parent: { select: { firstName: true, lastName: true } }
           }
         }),
         prisma.parent.findMany({
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
             createdAt: true,
-            students: { select: { name: true } }
+            students: { select: { firstName: true, lastName: true } }
           }
         }),
         prisma.tutor.findMany({
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
             createdAt: true,
             affiliation: true
@@ -74,10 +77,11 @@ export async function GET(request: NextRequest) {
           const students = await prisma.student.findMany({
             select: {
               id: true,
-              name: true,
+              firstName: true,
+              lastName: true,
               email: true,
               createdAt: true,
-              parent: { select: { name: true } }
+              parent: { select: { firstName: true, lastName: true } }
             }
           });
           users = students.map(s => ({ ...s, role: 'STUDENT' }));
@@ -90,10 +94,11 @@ export async function GET(request: NextRequest) {
             },
             select: {
               id: true,
-              name: true,
+              firstName: true,
+              lastName: true,
               email: true,
               createdAt: true,
-              parent: { select: { name: true } }
+              parent: { select: { firstName: true, lastName: true } }
             }
           });
           users = unlinkedStudents.map(s => ({ ...s, role: 'STUDENT' }));
@@ -102,10 +107,11 @@ export async function GET(request: NextRequest) {
           const parents = await prisma.parent.findMany({
             select: {
               id: true,
-              name: true,
+              firstName: true,
+              lastName: true,
               email: true,
               createdAt: true,
-              students: { select: { name: true } }
+              students: { select: { firstName: true, lastName: true } }
             }
           });
           users = parents.map(p => ({ ...p, role: 'PARENT' }));
@@ -114,7 +120,8 @@ export async function GET(request: NextRequest) {
           const tutors = await prisma.tutor.findMany({
             select: {
               id: true,
-              name: true,
+              firstName: true,
+              lastName: true,
               email: true,
               createdAt: true,
               affiliation: true

@@ -32,10 +32,10 @@ export async function GET(request: NextRequest) {
       },
       include: {
         student: {
-          select: { id: true, name: true, email: true }
+          select: { id: true, firstName: true, lastName: true, email: true }
         },
         tutor: {
-          select: { id: true, name: true, email: true }
+          select: { id: true, firstName: true, lastName: true, email: true }
         }
       },
       orderBy: {
@@ -74,12 +74,12 @@ export async function POST(request: NextRequest) {
     // 参加者とチューターの存在確認
     const student = await prisma.student.findUnique({
       where: { id: validatedData.studentId },
-      select: { id: true, name: true, email: true }
+      select: { id: true, firstName: true, lastName: true, email: true }
     });
 
     const tutor = await prisma.tutor.findUnique({
       where: { id: validatedData.tutorId },
-      select: { id: true, name: true, email: true }
+      select: { id: true, firstName: true, lastName: true, email: true }
     });
 
     if (!student) {
@@ -120,10 +120,10 @@ export async function POST(request: NextRequest) {
       },
       include: {
         student: {
-          select: { id: true, name: true, email: true }
+          select: { id: true, firstName: true, lastName: true, email: true }
         },
         tutor: {
-          select: { id: true, name: true, email: true }
+          select: { id: true, firstName: true, lastName: true, email: true }
         }
       }
     });

@@ -47,11 +47,12 @@ export default async function UnassignedUsersPage() {
   const parents = await prisma.parent.findMany({
     select: {
       id: true,
-      name: true,
+      firstName: true,
+      lastName: true,
       email: true,
     },
     orderBy: {
-      name: 'asc',
+      firstName: 'asc',
     },
   });
 

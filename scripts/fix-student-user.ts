@@ -17,7 +17,7 @@ async function fixStudentUser() {
       return;
     }
 
-    console.log('Found student:', student.name);
+    console.log('Found student:', `${student.firstName} ${student.lastName}`);
 
     // 既存のUserレコードをチェック
     const existingUser = await prisma.user.findUnique({
@@ -42,7 +42,7 @@ async function fixStudentUser() {
         const user = await tx.user.create({
           data: {
             email: email,
-            name: student.name,
+            name: `${student.firstName} ${student.lastName}`,
             emailVerified: new Date(),
           },
         });

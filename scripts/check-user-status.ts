@@ -38,10 +38,11 @@ async function checkUserStatus() {
     if (student) {
       console.log('✅ Student found:', {
         id: student.id,
-        name: student.name,
+        firstName: student.firstName,
+        lastName: student.lastName,
         email: student.email,
         userId: student.userId,
-        parent: student.parent?.name,
+        parent: student.parent ? `${student.parent.firstName} ${student.parent.lastName}` : null,
       });
     } else {
       console.log('❌ Student not found');

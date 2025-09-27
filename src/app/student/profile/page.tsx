@@ -21,9 +21,7 @@ export default async function StudentProfilePage() {
   const student = await prisma.student.findUnique({
     where: { email: session.user.email! },
     include: {
-      parent: {
-        select: { id: true, name: true }
-      }
+      parent: true
     }
   });
 
@@ -33,7 +31,7 @@ export default async function StudentProfilePage() {
 
   return (
     <>
-      <h1 className="text-3xl font-bold mb-8">参加者プロフィール</h1>
+      <h1 className="text-3xl font-bold mb-8">参加者・保護者プロフィール</h1>
       <StudentProfileClient initialData={student} />
     </>
   );

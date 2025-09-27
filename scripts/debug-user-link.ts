@@ -34,7 +34,8 @@ async function debugUserLink() {
     if (student) {
       console.log('Student:', {
         id: student.id,
-        name: student.name,
+        firstName: student.firstName,
+        lastName: student.lastName,
         email: student.email,
         userId: student.userId,
         createdAt: student.createdAt,

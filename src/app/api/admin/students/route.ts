@@ -25,11 +25,13 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         email: true,
-        name: true,
-        furigana: true,
+        firstName: true,
+        lastName: true,
+        firstNameKana: true,
+        lastNameKana: true,
         interests: true,
         parent: {
-          select: { id: true, name: true }
+          select: { id: true, firstName: true, lastName: true }
         },
         _count: {
           select: {

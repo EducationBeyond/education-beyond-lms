@@ -1,13 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { X, User, Mail, Building, MapPin, BookOpen, Calendar, ExternalLink } from 'lucide-react';
 
 interface Tutor {
   id: string;
   email: string;
-  name: string;
-  furigana?: string;
+  lastName: string;
+  firstName: string;
+  lastNameKana?: string;
+  firstNameKana?: string;
+  nameAlphabet?: string;
   affiliation?: string;
   address?: string;
   specialties: string[];
@@ -90,7 +94,7 @@ export function TutorDetailModal({ tutorId, isOpen, onClose }: TutorDetailModalP
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
       <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
-      
+
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
         <div className="relative w-full max-w-2xl bg-white rounded-lg shadow-xl">
@@ -128,10 +132,12 @@ export function TutorDetailModal({ tutorId, isOpen, onClose }: TutorDetailModalP
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0">
                     {tutor.avatarUrl ? (
-                      <img
+                      <Image
                         className="h-16 w-16 rounded-full object-cover"
                         src={tutor.avatarUrl}
-                        alt={tutor.name}
+                        alt={tutor.lastName + ' ' + tutor.firstName}
+                        width={64}
+                        height={64}
                       />
                     ) : (
                       <div className="h-16 w-16 rounded-full bg-gray-300 flex items-center justify-center">
@@ -140,9 +146,9 @@ export function TutorDetailModal({ tutorId, isOpen, onClose }: TutorDetailModalP
                     )}
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-gray-900">{tutor.name}</h3>
-                    {tutor.furigana && (
-                      <p className="text-sm text-gray-500">{tutor.furigana}</p>
+                    <h3 className="text-xl font-semibold text-gray-900">{tutor.lastName} {tutor.firstName}</h3>
+                    {tutor.lastNameKana && (
+                      <p className="text-sm text-gray-500">{tutor.lastNameKana} {tutor.firstNameKana}</p>
                     )}
                   </div>
                 </div>
@@ -165,17 +171,6 @@ export function TutorDetailModal({ tutorId, isOpen, onClose }: TutorDetailModalP
                       <div>
                         <p className="text-sm font-medium text-gray-700">所属</p>
                         <p className="text-sm text-gray-900">{tutor.affiliation}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Address */}
-                  {tutor.address && (
-                    <div className="flex items-center space-x-3">
-                      <MapPin className="h-5 w-5 text-gray-400" />
-                      <div>
-                        <p className="text-sm font-medium text-gray-700">住所</p>
-                        <p className="text-sm text-gray-900">{tutor.address}</p>
                       </div>
                     </div>
                   )}
