@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
+import { notifyTutorRegistration } from '@/lib/slack';
 
 const tutorRegistrationSchema = z.object({
   email: z.string().email('有効なメールアドレスを入力してください'),
@@ -101,10 +102,24 @@ export async function POST(request: NextRequest) {
       return { user, tutor };
     });
 
-    console.log('[API Tutor Registration] Registration successful:', { 
-      userId: result.user.id, 
-      tutorId: result.tutor.id 
+    console.log('[API Tutor Registration] Registration successful:', {
+      userId: result.user.id,
+      tutorId: result.tutor.id
     });
+
+    // Slack通知を送信
+    try {
+      await notifyTutorRegistration({
+        name: `${data.lastName} ${data.firstName}`,
+        email: data.email,
+        specialties: data.specialties,
+        affiliation: data.affiliation
+      });
+      console.log('[API Tutor Registration] Slack notification sent successfully');
+    } catch (error) {
+      console.error('[API Tutor Registration] Failed to send Slack notification:', error);
+      // Slack通知の失敗は登録成功の妨げにしない
+    }
 
     return NextResponse.json({
       message: 'チューターアカウントが正常に作成されました',

@@ -114,6 +114,7 @@ export async function PUT(request: NextRequest) {
     switch (userRole) {
       case 'student': {
         const validatedData = studentProfileSchema.parse(body);
+
         updatedProfile = await prisma.student.update({
           where: { email: session.user.email },
           data: {
@@ -128,6 +129,7 @@ export async function PUT(request: NextRequest) {
             cautions: validatedData.cautions || null,
           }
         });
+
         break;
       }
       case 'parent': {
@@ -145,7 +147,7 @@ export async function PUT(request: NextRequest) {
       case 'tutor': {
         const validatedData = tutorProfileSchema.parse(body);
         console.log('[API Profile] Validated data for tutor:', validatedData);
-        
+
         const updateData: any = {
           firstName: validatedData.firstName,
           lastName: validatedData.lastName,
@@ -162,13 +164,14 @@ export async function PUT(request: NextRequest) {
         if (validatedData.bankAccountInfo) {
           updateData.bankAccountInfo = validatedData.bankAccountInfo;
         }
-        
+
         console.log('[API Profile] Update data:', updateData);
-        
+
         updatedProfile = await prisma.tutor.update({
           where: { email: session.user.email },
           data: updateData
         });
+
         break;
       }
       default:
