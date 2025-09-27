@@ -43,7 +43,7 @@ export default async function UnassignedUsersPage() {
     },
   });
 
-  // 保護者一覧も取得（学生ロール割り当て時に必要）
+  // 保護者一覧も取得（参加者ロール割り当て時に必要）
   const parents = await prisma.parent.findMany({
     select: {
       id: true,

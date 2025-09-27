@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 const prisma = new PrismaClient();
 
-// 学生にGoogleメールアドレスを設定するスキーマ
+// 参加者にGoogleメールアドレスを設定するスキーマ
 const setGoogleEmailSchema = z.object({
   email: z.string().email('有効なGoogleメールアドレスを入力してください'),
 });
@@ -20,7 +20,7 @@ export async function PATCH(
 
     const { email } = validatedData;
 
-    // 学生の存在確認
+    // 参加者の存在確認
     const existingStudent = await prisma.student.findUnique({
       where: { id: studentId },
       include: { parent: true },
@@ -28,7 +28,7 @@ export async function PATCH(
 
     if (!existingStudent) {
       return NextResponse.json(
-        { error: '学生が見つかりません' },
+        { error: '参加者が見つかりません' },
         { status: 404 }
       );
     }
@@ -36,7 +36,7 @@ export async function PATCH(
     // 既にメールアドレスが設定されている場合はエラー
     if (existingStudent.email) {
       return NextResponse.json(
-        { error: 'この学生には既にGoogleメールアドレスが設定されています' },
+        { error: 'この参加者には既にGoogleメールアドレスが設定されています' },
         { status: 409 }
       );
     }
@@ -50,7 +50,7 @@ export async function PATCH(
       );
     }
 
-    // トランザクションで学生のメールアドレス設定とUserレコード作成を同時実行
+    // トランザクションで参加者のメールアドレス設定とUserレコード作成を同時実行
     const updatedStudent = await prisma.$transaction(async (tx) => {
       // 1. Userテーブルにレコードを作成
       const user = await tx.user.create({
@@ -91,7 +91,7 @@ export async function PATCH(
         email: updatedStudent.email,
         parent: updatedStudent.parent,
       },
-      message: `学生「${updatedStudent.name}」のGoogleメールアドレス「${email}」を設定しました。学生本人がGoogle OAuthでログインできるようになりました。`,
+      message: `参加者「${updatedStudent.name}」のGoogleメールアドレス「${email}」を設定しました。参加者本人がGoogle OAuthでログインできるようになりました。`,
     });
 
   } catch (error) {

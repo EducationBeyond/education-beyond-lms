@@ -33,7 +33,7 @@ export default async function StudentProfilePage() {
 
   return (
     <>
-      <h1 className="text-3xl font-bold mb-8">学生プロフィール</h1>
+      <h1 className="text-3xl font-bold mb-8">参加者プロフィール</h1>
       <StudentProfileClient initialData={student} />
     </>
   );

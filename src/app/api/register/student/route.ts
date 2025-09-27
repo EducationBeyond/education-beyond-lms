@@ -16,7 +16,7 @@ const studentRegistrationSchema = z.object({
   interests: z.array(z.string()).optional(),
   giftedTraits: z.array(z.string()).optional(),
   cautions: z.string().optional(),
-  // 保護者情報（オプション、未指定時は学生と同じ情報でParentを作成）
+  // 保護者情報（オプション、未指定時は参加者と同じ情報でParentを作成）
   parentEmail: z.string().email().optional(),
   parentName: z.string().optional(),
 });
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 既存の学生データ確認
+    // 既存の参加者データ確認
     const existingStudent = await prisma.student.findUnique({
       where: { email: data.email },
     });
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     if (existingStudent) {
       console.log('[API Student Registration] Student already exists:', data.email);
       return NextResponse.json(
-        { error: '既に学生として登録されています' },
+        { error: '既に参加者として登録されています' },
         { status: 409 }
       );
     }
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     // パスワードハッシュ化
     const passwordHash = await bcrypt.hash(data.password, 12);
 
-    // トランザクションでユーザー、保護者、学生データを作成
+    // トランザクションでユーザー、保護者、参加者データを作成
     const result = await prisma.$transaction(async (tx) => {
       // Userテーブルに登録
       const user = await tx.user.create({
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // 保護者情報を決定（未指定時は学生と同じ情報を使用）
+      // 保護者情報を決定（未指定時は参加者と同じ情報を使用）
       const parentEmail = data.parentEmail || data.email;
       const parentName = data.parentName || data.name + ' 保護者';
 
@@ -120,14 +120,14 @@ export async function POST(request: NextRequest) {
       return { user, parent, student };
     });
 
-    console.log('[API Student Registration] Registration successful:', { 
-      userId: result.user.id, 
+    console.log('[API Student Registration] Registration successful:', {
+      userId: result.user.id,
       parentId: result.parent.id,
-      studentId: result.student.id 
+      studentId: result.student.id
     });
 
     return NextResponse.json({
-      message: '学生アカウントが正常に作成されました',
+      message: '参加者アカウントが正常に作成されました',
       userId: result.user.id,
       parentId: result.parent.id,
       studentId: result.student.id,

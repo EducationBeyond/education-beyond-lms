@@ -29,32 +29,32 @@ const { PrismaClient } = require('@prisma/client');
 
 async function checkSeedData() {
   const prisma = new PrismaClient();
-  
+
   try {
     // 親データの確認
     const parents = await prisma.parent.findMany({
       include: { students: true }
     });
     console.log(`👨‍👩‍👧‍👦 Parents: ${parents.length}件`);
-    
-    // 学生データの確認
+
+    // 参加者データの確認
     const students = await prisma.student.findMany({
       include: { parent: true, pairings: true }
     });
     console.log(`🎓 Students: ${students.length}件`);
-    
+
     // チューターデータの確認
     const tutors = await prisma.tutor.findMany({
       include: { pairings: true, availabilities: true }
     });
     console.log(`👨‍🏫 Tutors: ${tutors.length}件`);
-    
+
     // 学習記録の確認
     const records = await prisma.learningRecord.findMany({
       include: { student: true, tutor: true }
     });
     console.log(`📚 Learning Records: ${records.length}件`);
-    
+
   } finally {
     await prisma.$disconnect();
   }
@@ -73,8 +73,8 @@ node check-seed-data.js
 ### テーブル一覧の確認
 ```javascript
 const tables = await prisma.$queryRaw`
-  SELECT table_name 
-  FROM information_schema.tables 
+  SELECT table_name
+  FROM information_schema.tables
   WHERE table_schema = 'public'
   ORDER BY table_name;
 `;
@@ -106,7 +106,7 @@ export async function GET() {
       prisma.student.count(),
       prisma.tutor.count(),
     ]);
-    
+
     return NextResponse.json({
       success: true,
       data: {
@@ -181,7 +181,7 @@ npx prisma db seed
 ### よくあるエラー
 - **P1001**: データベースサーバーに接続できない
   → DATABASE_URLとサーバー起動状況を確認
-  
+
 - **P2002**: 重複データエラー
   → シードデータの重複実行。テーブルをクリアしてから再実行
 

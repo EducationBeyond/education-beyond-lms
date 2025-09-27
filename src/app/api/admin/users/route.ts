@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -83,10 +83,10 @@ export async function GET(request: NextRequest) {
           users = students.map(s => ({ ...s, role: 'STUDENT' }));
           break;
         case 'STUDENT_UNLINKED':
-          // Googleアカウント未紐づけの学生のみ取得
+          // Googleアカウント未紐づけの参加者のみ取得
           const unlinkedStudents = await prisma.student.findMany({
             where: {
-              email: null // メールアドレスが設定されていない学生
+              email: null // メールアドレスが設定されていない参加者
             },
             select: {
               id: true,

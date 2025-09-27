@@ -272,7 +272,7 @@ export function SignInForm() {
             href="/register/student"
             className="text-blue-600 hover:text-blue-500 text-sm border border-blue-600 hover:border-blue-500 px-4 py-2 rounded-md transition-colors"
           >
-            学生登録
+            参加者登録
           </Link>
           <Link
             href="/register/tutor"

@@ -13,7 +13,7 @@ import { Mail, AlertCircle, CheckCircle } from 'lucide-react';
 interface User {
   id: string;
   name: string;
-  email: string | null; // 学生の場合はnullの可能性
+  email: string | null; // 参加者の場合はnullの可能性
   role: 'STUDENT' | 'PARENT' | 'TUTOR' | 'ADMIN';
   createdAt: string;
   parent?: { name: string };
@@ -37,7 +37,7 @@ export function AdminUsersClient() {
     try {
       setLoading(true);
       const response = await fetch(`/api/admin/users?role=${role}`);
-      
+
       if (!response.ok) {
         throw new Error('ユーザー情報の取得に失敗しました');
       }
@@ -115,7 +115,7 @@ export function AdminUsersClient() {
 
   const getRoleName = (role: string) => {
     switch (role) {
-      case 'STUDENT': return '学生';
+      case 'STUDENT': return '参加者';
       case 'PARENT': return '保護者';
       case 'TUTOR': return 'チューター';
       case 'ADMIN': return '管理者';
@@ -143,15 +143,15 @@ export function AdminUsersClient() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">すべてのユーザー</SelectItem>
-              <SelectItem value="STUDENT">学生</SelectItem>
-              <SelectItem value="STUDENT_UNLINKED">未紐づけ学生</SelectItem>
+              <SelectItem value="STUDENT">参加者</SelectItem>
+              <SelectItem value="STUDENT_UNLINKED">未紐づけ参加者</SelectItem>
               <SelectItem value="PARENT">保護者</SelectItem>
               <SelectItem value="TUTOR">チューター</SelectItem>
               <SelectItem value="ADMIN">管理者</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        
+
         <Button onClick={() => fetchUsers(filteredRole)}>
           更新
         </Button>
@@ -205,21 +205,21 @@ export function AdminUsersClient() {
                     <span className="font-medium">作成日: </span>
                     {new Date(user.createdAt).toLocaleDateString('ja-JP')}
                   </p>
-                  
+
                   {user.role === 'STUDENT' && user.parent && (
                     <p>
                       <span className="font-medium">保護者: </span>
                       {user.parent.name}
                     </p>
                   )}
-                  
+
                   {user.role === 'PARENT' && user.students && user.students.length > 0 && (
                     <p>
                       <span className="font-medium">お子様: </span>
                       {user.students.map(s => s.name).join(', ')}
                     </p>
                   )}
-                  
+
                   {user.role === 'TUTOR' && user.affiliation && (
                     <p>
                       <span className="font-medium">所属: </span>
@@ -228,7 +228,7 @@ export function AdminUsersClient() {
                   )}
                 </div>
 
-                {/* 学生でGoogleアカウント未設定の場合のみボタン/フォーム表示 */}
+                {/* 参加者でGoogleアカウント未設定の場合のみボタン/フォーム表示 */}
                 {user.role === 'STUDENT' && !user.email && (
                   <div className="mt-4 pt-4 border-t">
                     {linkingStudentId === user.id ? (
@@ -262,7 +262,7 @@ export function AdminUsersClient() {
                             className="h-8 text-xs"
                           />
                           <p className="text-xs text-muted-foreground">
-                            ※ 学生本人がこのメールアドレスでGoogle OAuthログインを行います
+                            ※ 参加者本人がこのメールアドレスでGoogle OAuthログインを行います
                           </p>
                         </div>
 
@@ -319,7 +319,7 @@ export function AdminUsersClient() {
             <p className="text-2xl font-bold">{users.length}</p>
           </div>
           <div>
-            <p className="font-medium">学生数</p>
+            <p className="font-medium">参加者数</p>
             <p className="text-2xl font-bold text-blue-600">
               {users.filter(u => u.role === 'STUDENT').length}
             </p>

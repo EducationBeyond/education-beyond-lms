@@ -18,8 +18,8 @@ export default async function TutorStudentsPage() {
   return (
     <>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">担当学生</h1>
-        <p className="text-gray-600 mt-2">現在担当している学生の情報と学習記録を管理できます</p>
+        <h1 className="text-3xl font-bold text-gray-900">担当参加者</h1>
+        <p className="text-gray-600 mt-2">現在担当している参加者の情報と学習記録を管理できます</p>
       </div>
       <TutorAssignedStudentsClient />
     </>

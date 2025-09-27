@@ -75,7 +75,7 @@ export function Sidebar() {
           ...baseItems,
           { href: '/tutor/profile', label: 'マイページ', icon: <User className="h-5 w-5" /> },
           { href: '/tutor/records', label: '授業履歴', icon: <BookOpen className="h-5 w-5" /> },
-          { href: '/tutor/students', label: '担当学生', icon: <Users className="h-5 w-5" /> },
+          { href: '/tutor/students', label: '担当参加者', icon: <Users className="h-5 w-5" /> },
         ];
       case 'admin':
         return [
@@ -90,11 +90,11 @@ export function Sidebar() {
 
   const navigationItems = getNavigationItems();
 
-  console.log('[Sidebar] Current state:', { 
-    sessionStatus: status, 
+  console.log('[Sidebar] Current state:', {
+    sessionStatus: status,
     userEmail: session?.user?.email,
-    userRole, 
-    navigationItemsCount: navigationItems.length 
+    userRole,
+    navigationItemsCount: navigationItems.length
   });
 
   // ログインしていない場合はサイドバーを表示しない

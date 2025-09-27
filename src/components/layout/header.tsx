@@ -66,7 +66,7 @@ export function Header() {
         return [
           { href: '/tutor/profile', label: 'マイページ' },
           { href: '/tutor/records', label: '授業履歴' },
-          { href: '/tutor/students', label: '担当学生' },
+          { href: '/tutor/students', label: '担当参加者' },
         ];
       case 'admin':
         return [
@@ -78,12 +78,12 @@ export function Header() {
   };
 
   const navigationItems = getNavigationItems();
-  
-  console.log('[Header] Current state:', { 
-    sessionStatus: status, 
+
+  console.log('[Header] Current state:', {
+    sessionStatus: status,
     userEmail: session?.user?.email,
-    userRole, 
-    navigationItemsCount: navigationItems.length 
+    userRole,
+    navigationItemsCount: navigationItems.length
   });
 
   return (
@@ -176,7 +176,7 @@ export function Header() {
               >
                 ホーム
               </Link>
-              
+
               {navigationItems.map((item) => (
                 <Link
                   key={item.href}
@@ -187,7 +187,7 @@ export function Header() {
                   {item.label}
                 </Link>
               ))}
-              
+
               <button
                 onClick={() => {
                   handleSignOut();

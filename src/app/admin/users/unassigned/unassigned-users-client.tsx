@@ -346,7 +346,7 @@ export function UnassignedUsersClient({ unassignedUsers: initialUsers, parents }
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="student">学生</SelectItem>
+                  <SelectItem value="student">参加者</SelectItem>
                   <SelectItem value="parent">保護者</SelectItem>
                   <SelectItem value="tutor">チューター</SelectItem>
                   <SelectItem value="admin">管理者</SelectItem>

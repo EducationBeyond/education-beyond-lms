@@ -69,14 +69,14 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
   // nullの値を空文字列に変換してデフォルト値を準備
   const getDefaultValues = () => {
     if (!initialData) return {};
-    
+
     const cleanedData = { ...initialData };
     Object.keys(cleanedData).forEach(key => {
       if (cleanedData[key] === null) {
         cleanedData[key] = '';
       }
     });
-    
+
     return cleanedData;
   };
 
@@ -106,7 +106,7 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
       <CardHeader>
         <CardTitle>プロフィール編集</CardTitle>
         <CardDescription>
-          {role === 'STUDENT' && '学生プロフィールを編集できます'}
+          {role === 'STUDENT' && '参加者プロフィールを編集できます'}
           {role === 'PARENT' && '保護者プロフィールを編集できます'}
           {role === 'TUTOR' && 'チュータープロフィールを編集できます'}
         </CardDescription>
@@ -148,9 +148,9 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
                   <FormItem>
                     <FormLabel>ふりがな</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="ふりがなを入力" 
-                        {...field} 
+                      <Input
+                        placeholder="ふりがなを入力"
+                        {...field}
                         value={field.value || ''}
                       />
                     </FormControl>
@@ -168,7 +168,7 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
                   <FormItem>
                     <FormLabel>住所</FormLabel>
                     <FormControl>
-                      <Textarea 
+                      <Textarea
                         placeholder="住所を入力"
                         {...field}
                         value={field.value || ''}
@@ -264,7 +264,7 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
                     <FormItem>
                       <FormLabel>気をつけること</FormLabel>
                       <FormControl>
-                        <Textarea 
+                        <Textarea
                           placeholder="アレルギーや特記事項があれば記入"
                           {...field}
                           value={field.value || ''}
@@ -321,7 +321,7 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
                     <FormItem>
                       <FormLabel>振込先</FormLabel>
                       <FormControl>
-                        <Textarea 
+                        <Textarea
                           placeholder="銀行口座情報など"
                           {...field}
                           value={field.value || ''}
@@ -339,7 +339,7 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
                     <FormItem>
                       <FormLabel>事前面談用カレンダーURL</FormLabel>
                       <FormControl>
-                        <Input 
+                        <Input
                           type="url"
                           placeholder="https://calendly.com/your-name/interview"
                           {...field}
@@ -358,7 +358,7 @@ export function ProfileForm({ role, initialData, onSubmit }: ProfileFormProps) {
                     <FormItem>
                       <FormLabel>研究予約用カレンダーURL</FormLabel>
                       <FormControl>
-                        <Input 
+                        <Input
                           type="url"
                           placeholder="https://calendly.com/your-name/lesson"
                           {...field}

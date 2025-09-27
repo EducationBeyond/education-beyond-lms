@@ -15,7 +15,7 @@ export default function StudentRegistrationSuccessPage() {
             アカウント登録完了！
           </CardTitle>
           <p className="text-gray-600">
-            保護者と学生のアカウントが正常に作成されました
+            保護者と参加者のアカウントが正常に作成されました
           </p>
         </CardHeader>
 
@@ -34,11 +34,11 @@ export default function StudentRegistrationSuccessPage() {
                 </li>
                 <li className="flex items-center gap-2">
                   <User className="h-4 w-4" />
-                  学生プロフィールの作成
+                  参加者プロフィールの作成
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4" />
-                  保護者と学生の自動紐づけ
+                  保護者と参加者の自動紐づけ
                 </li>
               </ul>
             </div>
@@ -57,9 +57,9 @@ export default function StudentRegistrationSuccessPage() {
                     1
                   </div>
                   <div>
-                    <p className="font-medium text-blue-900">学生のGoogleアカウント設定</p>
+                    <p className="font-medium text-blue-900">参加者のGoogleアカウント設定</p>
                     <p className="text-sm text-blue-700">
-                      運営チームが学生用のGoogleアカウントを作成し、メールアドレスとパスワードを設定いたします。
+                      運営チームが参加者用のGoogleアカウントを作成し、メールアドレスとパスワードを設定いたします。
                     </p>
                   </div>
                 </div>
@@ -71,7 +71,7 @@ export default function StudentRegistrationSuccessPage() {
                   <div>
                     <p className="font-medium text-blue-900">ログイン情報のご連絡</p>
                     <p className="text-sm text-blue-700">
-                      学生用のログイン情報を保護者の方にメールでお送りします。
+                      参加者用のログイン情報を保護者の方にメールでお送りします。
                     </p>
                   </div>
                 </div>
@@ -83,7 +83,7 @@ export default function StudentRegistrationSuccessPage() {
                   <div>
                     <p className="font-medium text-blue-900">チューターとのマッチング</p>
                     <p className="text-sm text-blue-700">
-                      学生の興味・関心やギフテッド特性に基づいて、最適なチューターをご紹介します。
+                      参加者の興味・関心やギフテッド特性に基づいて、最適なチューターをご紹介します。
                     </p>
                   </div>
                 </div>
@@ -122,7 +122,7 @@ export default function StudentRegistrationSuccessPage() {
           {/* 注意書き */}
           <div className="text-xs text-gray-500 text-center pt-4 border-t">
             <p>
-              学生のGoogleアカウントの設定完了まで、通常1-2営業日程度お時間をいただきます。<br />
+              参加者のGoogleアカウントの設定完了まで、通常1-2営業日程度お時間をいただきます。<br />
               設定完了次第、保護者の方にメールでご連絡いたします。
             </p>
           </div>

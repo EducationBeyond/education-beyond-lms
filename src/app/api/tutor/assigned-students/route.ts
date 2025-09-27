@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     console.log('[Tutor Assigned Students] Fetching assigned students for tutor:', tutor.id);
 
-    // チューターの担当学生（アクティブなペアリング）を取得
+    // チューターの担当参加者（アクティブなペアリング）を取得
     const pairings = await prisma.pairing.findMany({
       where: {
         tutorId: tutor.id,

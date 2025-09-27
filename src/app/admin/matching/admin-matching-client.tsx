@@ -96,7 +96,7 @@ export function AdminMatchingClient() {
 
   const handleCreatePairing = async () => {
     if (!selectedStudent || !selectedTutor) {
-      setError('学生とチューターを選択してください');
+      setError('参加者とチューターを選択してください');
       return;
     }
 
@@ -138,7 +138,7 @@ export function AdminMatchingClient() {
   };
 
   const getAvailableTutors = () => {
-    return tutors; // チューターは複数の学生を担当可能
+    return tutors; // チューターは複数の参加者を担当可能
   };
 
   return (
@@ -151,7 +151,7 @@ export function AdminMatchingClient() {
             新しいマッチング
           </CardTitle>
           <CardDescription>
-            事前面談が完了した学生とチューターをマッチングします
+            事前面談が完了した参加者とチューターをマッチングします
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -169,10 +169,10 @@ export function AdminMatchingClient() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">学生を選択</label>
+              <label className="text-sm font-medium">参加者を選択</label>
               <Select value={selectedStudent} onValueChange={setSelectedStudent}>
                 <SelectTrigger>
-                  <SelectValue placeholder="学生を選択してください" />
+                  <SelectValue placeholder="参加者を選択してください" />
                 </SelectTrigger>
                 <SelectContent>
                   {getAvailableStudents().map((student) => (
@@ -188,7 +188,7 @@ export function AdminMatchingClient() {
                 </SelectContent>
               </Select>
               <p className="text-xs text-gray-500">
-                未マッチングの学生: {getAvailableStudents().length}名
+                未マッチングの参加者: {getAvailableStudents().length}名
               </p>
             </div>
 
@@ -204,7 +204,7 @@ export function AdminMatchingClient() {
                       <div className="flex flex-col">
                         <span>{tutor.name}</span>
                         <span className="text-xs text-gray-500">
-                          {tutor.specialties.length > 0 && 
+                          {tutor.specialties.length > 0 &&
                             `専門: ${tutor.specialties.map(s => specialtyMap[s] || s).join(', ')}`
                           }
                           {tutor._count.pairings > 0 && ` (担当中: ${tutor._count.pairings}名)`}
@@ -217,8 +217,8 @@ export function AdminMatchingClient() {
             </div>
           </div>
 
-          <Button 
-            onClick={handleCreatePairing} 
+          <Button
+            onClick={handleCreatePairing}
             disabled={loading || !selectedStudent || !selectedTutor}
             className="w-full"
           >
@@ -258,9 +258,9 @@ export function AdminMatchingClient() {
                           {pairing.status === 'ACTIVE' ? 'アクティブ' : pairing.status}
                         </Badge>
                       </div>
-                      
+
                       <div className="text-sm text-gray-600 space-y-1">
-                        <p>学生: {pairing.student.email}</p>
+                        <p>参加者: {pairing.student.email}</p>
                         <p>チューター: {pairing.tutor.email}</p>
                         {pairing.startedAt && (
                           <p>開始日: {new Date(pairing.startedAt).toLocaleDateString('ja-JP')}</p>
@@ -270,7 +270,7 @@ export function AdminMatchingClient() {
                         )}
                       </div>
                     </div>
-                    
+
                     <div className="text-xs text-gray-500">
                       作成: {new Date(pairing.createdAt).toLocaleDateString('ja-JP')}
                     </div>
@@ -286,7 +286,7 @@ export function AdminMatchingClient() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">総学生数</CardTitle>
+            <CardTitle className="text-sm font-medium">総参加者数</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{students.length}</div>

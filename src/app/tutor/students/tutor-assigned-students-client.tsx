@@ -61,11 +61,11 @@ export function TutorAssignedStudentsClient() {
         setPairings(data.pairings || []);
       } else {
         const error = await response.json();
-        setError(error.error || '担当学生の取得に失敗しました');
+        setError(error.error || '担当参加者の取得に失敗しました');
       }
     } catch (error) {
       console.error('Failed to fetch assigned students:', error);
-      setError('担当学生の取得に失敗しました');
+      setError('担当参加者の取得に失敗しました');
     } finally {
       setLoading(false);
     }
@@ -109,14 +109,14 @@ export function TutorAssignedStudentsClient() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            担当学生
+            担当参加者
           </CardTitle>
         </CardHeader>
         <CardContent className="text-center py-8">
           <GraduationCap className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-500 mb-4">まだ担当学生がいません</p>
+          <p className="text-gray-500 mb-4">まだ担当参加者がいません</p>
           <p className="text-sm text-gray-400">
-            マッチングが完了すると、こちらに担当学生の情報が表示されます
+            マッチングが完了すると、こちらに担当参加者の情報が表示されます
           </p>
         </CardContent>
       </Card>
@@ -130,14 +130,14 @@ export function TutorAssignedStudentsClient() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5 text-blue-600" />
-            担当学生概要
+            担当参加者概要
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center">
               <div className="text-3xl font-bold text-blue-600">{pairings.length}</div>
-              <div className="text-sm text-gray-600">総担当学生数</div>
+              <div className="text-sm text-gray-600">総担当参加者数</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-green-600">
@@ -155,7 +155,7 @@ export function TutorAssignedStudentsClient() {
         </CardContent>
       </Card>
 
-      {/* 学生リスト */}
+      {/* 参加者リスト */}
       <div className="grid grid-cols-1 gap-6">
         {pairings.map((pairing) => {
           const student = pairing.student;

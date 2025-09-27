@@ -7,7 +7,7 @@ import { z } from 'zod';
 const prisma = new PrismaClient();
 
 const createPairingSchema = z.object({
-  studentId: z.string().min(1, '学生IDは必須です'),
+  studentId: z.string().min(1, '参加者IDは必須です'),
   tutorId: z.string().min(1, 'チューターIDは必須です'),
   score: z.number().min(0).max(1).optional(),
 });
@@ -15,7 +15,7 @@ const createPairingSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
 
     console.log('[Admin Pairings] Creating pairing:', validatedData);
 
-    // 学生とチューターの存在確認
+    // 参加者とチューターの存在確認
     const student = await prisma.student.findUnique({
       where: { id: validatedData.studentId },
       select: { id: true, name: true, email: true }
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!student) {
-      return NextResponse.json({ error: '指定された学生が見つかりません' }, { status: 404 });
+      return NextResponse.json({ error: '指定された参加者が見つかりません' }, { status: 404 });
     }
 
     if (!tutor) {
@@ -103,8 +103,8 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingPairing) {
-      return NextResponse.json({ 
-        error: 'この学生とチューターのペアリングは既に存在します' 
+      return NextResponse.json({
+        error: 'この参加者とチューターのペアリングは既に存在します'
       }, { status: 400 });
     }
 

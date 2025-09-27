@@ -14,7 +14,7 @@ export function TutorProfileClient({ initialData }: TutorProfileClientProps) {
 
   const handleImageUpload = async (imageUrl: string) => {
     setAvatarUrl(imageUrl);
-    
+
     // 画像アップロード後に自動的にプロフィールを保存
     try {
       const response = await fetch('/api/profile', {
@@ -71,7 +71,7 @@ export function TutorProfileClient({ initialData }: TutorProfileClientProps) {
           currentImageUrl={avatarUrl}
           onImageUpload={handleImageUpload}
         />
-        
+
         <ProfileForm
           role="TUTOR"
           initialData={initialData}
@@ -83,8 +83,8 @@ export function TutorProfileClient({ initialData }: TutorProfileClientProps) {
         {initialData.pairings && initialData.pairings.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>担当学生</CardTitle>
-              <CardDescription>現在指導中の学生一覧</CardDescription>
+              <CardTitle>担当参加者</CardTitle>
+              <CardDescription>現在指導中の参加者一覧</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -111,7 +111,7 @@ export function TutorProfileClient({ initialData }: TutorProfileClientProps) {
               <div className="space-y-2">
                 {initialData.availabilities.map((availability: any) => (
                   <div key={availability.id} className="text-sm">
-                    {new Date(availability.startAt).toLocaleString('ja-JP')} - 
+                    {new Date(availability.startAt).toLocaleString('ja-JP')} -
                     {new Date(availability.endAt).toLocaleString('ja-JP')}
                   </div>
                 ))}
@@ -128,8 +128,8 @@ export function TutorProfileClient({ initialData }: TutorProfileClientProps) {
               <CardTitle>現在のプロフィール画像</CardTitle>
             </CardHeader>
             <CardContent>
-              <img 
-                src={avatarUrl} 
+              <img
+                src={avatarUrl}
                 alt="プロフィール画像"
                 className="w-32 h-32 rounded-full object-cover mx-auto"
               />

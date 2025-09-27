@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 const prisma = new PrismaClient();
 
-// 保護者と学生の統合登録用スキーマ
+// 保護者と参加者の統合登録用スキーマ
 const parentStudentRegistrationSchema = z.object({
   parent: z.object({
     email: z.string().email('有効なメールアドレスを入力してください'),
@@ -14,7 +14,7 @@ const parentStudentRegistrationSchema = z.object({
     address: z.string().optional(),
   }),
   student: z.object({
-    name: z.string().min(1, '学生名は必須です'),
+    name: z.string().min(1, '参加者名は必須です'),
     furigana: z.string().optional(),
     address: z.string().optional(),
     birthdate: z.string().optional(),
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     // パスワードハッシュ化（保護者のみ）
     const hashedParentPassword = await bcrypt.hash(parentData.password, 12);
 
-    // トランザクションで保護者と学生を作成
+    // トランザクションで保護者と参加者を作成
     console.log('Starting transaction with data:', { parentData, studentData });
     const result = await prisma.$transaction(async (tx) => {
       console.log('Creating parent...');
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
       console.log('Parent created with ID:', createdParent.id);
 
       console.log('Creating student...');
-      // 2. 学生を作成（保護者と自動リンク、メールとパスワードは後から設定）
+      // 2. 参加者を作成（保護者と自動リンク、メールとパスワードは後から設定）
       const studentCreateData = {
         email: null, // 明示的にnullを設定（運営側で後から設定）
         password: null, // 明示的にnullを設定（運営側で後から設定）

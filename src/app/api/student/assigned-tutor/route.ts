@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Student access required' }, { status: 403 });
     }
 
-    // 学生の情報を取得
+    // 参加者の情報を取得
     const student = await prisma.student.findUnique({
       where: { email: session.user.email },
       select: { id: true, name: true, email: true }
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     console.log('[Student Assigned Tutor] Fetching assigned tutor for student:', student.id);
 
-    // 学生の担当チューター（アクティブなペアリング）を取得
+    // 参加者の担当チューター（アクティブなペアリング）を取得
     const activePairing = await prisma.pairing.findFirst({
       where: {
         studentId: student.id,
@@ -60,16 +60,16 @@ export async function GET(request: NextRequest) {
     });
 
     if (!activePairing) {
-      return NextResponse.json({ 
+      return NextResponse.json({
         message: 'No assigned tutor found',
         pairing: null,
-        tutor: null 
+        tutor: null
       });
     }
 
     console.log('[Student Assigned Tutor] Found assigned tutor:', activePairing.tutor.name);
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       pairing: {
         id: activePairing.id,
         status: activePairing.status,
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
         startedAt: activePairing.startedAt,
         createdAt: activePairing.createdAt,
       },
-      tutor: activePairing.tutor 
+      tutor: activePairing.tutor
     });
   } catch (error) {
     console.error('[Student Assigned Tutor] Error fetching assigned tutor:', error);

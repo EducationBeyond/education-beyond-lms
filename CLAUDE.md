@@ -114,7 +114,7 @@ Claude をエンジニア/PM/アーキテクトとして機能させるための
 
 ## 4. 主要ユースケース & シーケンス
 
-### 4.1 学生→チューター検索
+### 4.1 参加者→チューター検索
 1) Student が条件（専門分野/時間帯）で検索
 2) Tutor.Availability と Pairing 状態から候補提示
 3) スコアリング: specialties × interests, 実績, 評価
@@ -156,7 +156,7 @@ Claude をエンジニア/PM/アーキテクトとして機能させるための
 ## 6. API 契約（例）
 
 ### 6.1 REST（/api）
-- `GET /students?interest=math&limit=20` → 学生一覧（匿名化可）
+- `GET /students?interest=math&limit=20` → 参加者一覧（匿名化可）
 - `POST /reservations` → 予約作成 `{student_id, tutor_id, start_at, end_at}`
 - `PATCH /reservations/:id/confirm` → チューター承認
 - `POST /learning-records` → 記録作成
@@ -209,7 +209,7 @@ Claude をエンジニア/PM/アーキテクトとして機能させるための
 ---
 
 ## 10. 受け入れ基準（サンプル）
-- 学生は **興味分野** と **曜日/時間** でチューター候補を3件以上取得できる
+- 参加者は **興味分野** と **曜日/時間** でチューター候補を3件以上取得できる
 - 予約確定時に双方へカレンダーイベント + Meetリンクが付与される
 - 学習記録は Student/Parent で閲覧可、他者からは閲覧不可
 - 入金がMFで検知されると 10分以内 に Payment ステータスが反映
@@ -341,4 +341,3 @@ create table students (
 
 ### 最後に
 このファイルを「単一の真実の源泉（SSOT）」として運用し、Claude との対話に常時添付/引用して開発します。更新のたびに **目的・制約・受け入れ基準** を明記し、迷いを減らしましょう。
-

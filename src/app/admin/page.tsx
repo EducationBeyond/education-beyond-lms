@@ -8,7 +8,7 @@ export default function AdminPage() {
     <div className="min-h-screen p-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">管理者ダッシュボード</h1>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* ユーザー管理 */}
           <Card>
@@ -18,7 +18,7 @@ export default function AdminPage() {
                 ユーザー管理
               </CardTitle>
               <CardDescription>
-                学生、保護者、チューターの管理
+                参加者、保護者、チューターの管理
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -38,7 +38,7 @@ export default function AdminPage() {
                 マッチング管理
               </CardTitle>
               <CardDescription>
-                学生とチューターのマッチング
+                参加者とチューターのマッチング
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -73,7 +73,7 @@ export default function AdminPage() {
           <h2 className="text-xl font-semibold mb-4">管理機能について</h2>
           <div className="space-y-2 text-gray-600">
             <p>• <strong>ユーザー管理</strong>: 登録されたユーザーの一覧表示と管理</p>
-            <p>• <strong>マッチング管理</strong>: 事前面談が完了した学生とチューターをマッチング</p>
+            <p>• <strong>マッチング管理</strong>: 事前面談が完了した参加者とチューターをマッチング</p>
             <p>• <strong>システム設定</strong>: アプリケーションの各種設定（今後実装予定）</p>
           </div>
         </div>

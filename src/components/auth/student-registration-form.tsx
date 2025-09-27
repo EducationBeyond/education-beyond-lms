@@ -27,7 +27,7 @@ const studentRegistrationSchema = z.object({
   parentCity: z.string().min(1, { message: '市区町村は必須です' }),
   parentAddressDetail: z.string().min(1, { message: 'それ以下の住所は必須です' }),
 
-  // 学生情報
+  // 参加者情報
   entryType: z.string().optional(),
   lastName: z.string().min(1, { message: '生徒の姓は必須です' }),
   firstName: z.string().min(1, { message: '生徒の名は必須です' }),
@@ -72,9 +72,9 @@ const interestOptions = [
 ];
 
 const entryTypeOptions = [
-  { value: 'general', label: '一般' },
-  { value: 'scholarship', label: '奨学生' },
-  { value: 'trial', label: '体験' },
+  { value: 'standard', label: 'スタンダード' },
+  { value: 'nagano', label: '長野' },
+  { value: 'hiroshima', label: '広島' },
 ];
 
 const howDidYouKnowOptions = [
@@ -126,7 +126,7 @@ export function StudentRegistrationForm() {
         ...studentData
       } = data;
 
-      // 保護者と学生の両方の情報を含むペイロード
+      // 保護者と参加者の両方の情報を含むペイロード
       const submitData = {
         parent: {
           email: parentEmail,
@@ -181,9 +181,9 @@ export function StudentRegistrationForm() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-2xl">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">学生アカウント登録</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">参加者アカウント登録</CardTitle>
           <p className="text-sm text-gray-600 text-center">
-            保護者と学生の情報を入力して、学習を始めるためのアカウントを作成しましょう
+            保護者と参加者の情報を入力して、学習を始めるためのアカウントを作成しましょう
           </p>
         </CardHeader>
         <CardContent>
@@ -450,7 +450,7 @@ export function StudentRegistrationForm() {
             <div className="space-y-4 border-t pt-6">
               <h3 className="text-lg font-medium flex items-center gap-2">
                 <User className="h-5 w-5" />
-                学生基本情報
+                参加者基本情報
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

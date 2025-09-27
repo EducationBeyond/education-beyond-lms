@@ -7,7 +7,7 @@ async function fixStudentUser() {
     const studentId = 'cmfj973qe00029keh6u473c9x';
     const email = 'takayuki.endo@education-beyond.org';
 
-    // 学生データを取得
+    // 参加者データを取得
     const student = await prisma.student.findUnique({
       where: { id: studentId },
     });
@@ -27,7 +27,7 @@ async function fixStudentUser() {
     if (existingUser) {
       console.log('User already exists, linking to student...');
 
-      // 学生のuserIdを更新
+      // 参加者のuserIdを更新
       await prisma.student.update({
         where: { id: studentId },
         data: { userId: existingUser.id },
@@ -47,7 +47,7 @@ async function fixStudentUser() {
           },
         });
 
-        // 2. 学生のuserIdを更新
+        // 2. 参加者のuserIdを更新
         await tx.student.update({
           where: { id: studentId },
           data: { userId: user.id },
