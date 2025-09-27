@@ -159,16 +159,16 @@ export async function notifyStudentRegistration(studentData: {
   };
 
   // 保護者名があれば追加
-  if (studentData.parentName) {
-    message.blocks[2].fields.push({
+  if (studentData.parentName && message.blocks[2] && 'fields' in message.blocks[2]) {
+    (message.blocks[2] as any).fields.push({
       type: "mrkdwn",
       text: `*保護者名:*\n${studentData.parentName}`
     });
   }
 
   // 学年があれば追加
-  if (studentData.grade) {
-    message.blocks[2].fields.push({
+  if (studentData.grade && message.blocks[2] && 'fields' in message.blocks[2]) {
+    (message.blocks[2] as any).fields.push({
       type: "mrkdwn",
       text: `*学年:*\n${studentData.grade}`
     });

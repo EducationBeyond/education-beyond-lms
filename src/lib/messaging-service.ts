@@ -25,12 +25,12 @@ export async function sendMessageFromStudent(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     // 1. LINE User ID から Student を特定
-    const externalAccount = await prisma.externalAccount.findUnique({
+    const externalAccount = await prisma.externalAccount.findFirst({
       where: {
-        provider_externalId: {
-          provider: 'LINE',
-          externalId: lineUserId,
-        },
+        provider: 'LINE',
+        externalId: lineUserId,
+        userType: 'STUDENT',
+        isActive: true,
       },
     });
 
@@ -117,12 +117,12 @@ export async function sendMessageFromTutor(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     // 1. Slack User ID から Tutor を特定
-    const externalAccount = await prisma.externalAccount.findUnique({
+    const externalAccount = await prisma.externalAccount.findFirst({
       where: {
-        provider_externalId: {
-          provider: 'SLACK',
-          externalId: slackUserId,
-        },
+        provider: 'SLACK',
+        externalId: slackUserId,
+        userType: 'TUTOR',
+        isActive: true,
       },
     });
 

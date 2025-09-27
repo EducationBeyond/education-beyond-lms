@@ -5,7 +5,7 @@ import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import { authPrisma } from "@/lib/auth-prisma";
 import { compare } from "bcryptjs";
-import { getUserRole, getRoleRedirectPath } from "@/lib/user-role";
+import { getUserRole } from "@/lib/user-role";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(authPrisma),
@@ -42,7 +42,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error: '/login', // エラー時もログインページにリダイレクト
   },
   callbacks: {
-    async signIn({ account, profile, user }) {
+    async signIn({ account, profile }) {
       // Google OAuthの場合のみ特別な処理を行う
       if (account?.provider === 'google' && profile?.email) {
         console.log('[NextAuth] Google OAuth sign in attempt for:', profile.email);
