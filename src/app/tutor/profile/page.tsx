@@ -24,9 +24,6 @@ export default async function TutorProfilePage() {
         include: {
           student: { select: { id: true, firstName: true, lastName: true } }
         }
-      },
-      availabilities: {
-        orderBy: { startAt: 'asc' }
       }
     }
   });

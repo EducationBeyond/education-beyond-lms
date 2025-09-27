@@ -167,7 +167,6 @@ model Tutor {
   prefecture           String
   selfIntroduction     String           @map("self_introduction")
   userId               String           @unique @map("user_id")
-  availabilities       Availability[]
   learningRecords      LearningRecord[]
   pairings             Pairing[]
   reservations         Reservation[]
@@ -275,24 +274,6 @@ model Pairing {
   @@map("pairings")
 }
 
-model Availability {
-  id         String    @id @default(cuid())
-  tutorId    String    @map("tutor_id")
-  startAt    DateTime  @map("start_at") @db.Timestamptz(6)
-  endAt      DateTime  @map("end_at") @db.Timestamptz(6)
-  recurrence String?
-  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
-  createdBy  String?   @map("created_by")
-  updatedBy  String?   @map("updated_by")
-  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
-  tutor      Tutor     @relation(fields: [tutorId], references: [id])
-
-  @@index([tutorId])
-  @@index([startAt])
-  @@index([deletedAt])
-  @@map("availabilities")
-}
 
 model CalendarEvent {
   id            String           @id @default(cuid())

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth as nextAuth } from '@/auth';
 import sharp from 'sharp';
+import { google } from 'googleapis';
 
 export async function POST(request: NextRequest) {
   try {
@@ -91,12 +92,11 @@ export async function POST(request: NextRequest) {
 
     if (process.env.GOOGLE_DRIVE_CLIENT_EMAIL && process.env.GOOGLE_DRIVE_PRIVATE_KEY) {
       // サービスアカウント認証（Vercel用）
-      googleAuth = new google.auth.JWT(
-        process.env.GOOGLE_DRIVE_CLIENT_EMAIL,
-        undefined,
-        process.env.GOOGLE_DRIVE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-        ['https://www.googleapis.com/auth/drive.file']
-      );
+      googleAuth = new google.auth.JWT({
+        email: process.env.GOOGLE_DRIVE_CLIENT_EMAIL,
+        key: process.env.GOOGLE_DRIVE_PRIVATE_KEY!.replace(/\\\\n/g, '\n'),
+        scopes: ['https://www.googleapis.com/auth/drive.file']
+      });
     } else {
       // Application Default Credentials（開発環境用）
       googleAuth = new google.auth.GoogleAuth({

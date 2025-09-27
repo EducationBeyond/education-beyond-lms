@@ -6,6 +6,28 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🌱 Starting seed...");
 
+  // Clear existing data in dependency order
+  console.log("🧹 Clearing existing data...");
+  await prisma.message.deleteMany();
+  await prisma.messageLink.deleteMany();
+  await prisma.cRMContact.deleteMany();
+  await prisma.payment.deleteMany();
+  await prisma.calendarEvent.deleteMany();
+  await prisma.reservation.deleteMany();
+  await prisma.driveFile.deleteMany();
+  await prisma.learningRecord.deleteMany();
+  await prisma.pairing.deleteMany();
+  await prisma.admin.deleteMany();
+  await prisma.tutor.deleteMany();
+  await prisma.student.deleteMany();
+  await prisma.parent.deleteMany();
+  await prisma.externalAccount.deleteMany();
+  await prisma.session.deleteMany();
+  await prisma.account.deleteMany();
+  await prisma.verificationToken.deleteMany();
+  await prisma.user.deleteMany();
+  console.log("✅ Data cleared successfully");
+
   // Create test admin user first
   const adminUser = await prisma.user.create({
     data: {
@@ -248,16 +270,6 @@ async function main() {
     },
   });
 
-  // Create sample availability
-  const availability1 = await prisma.availability.create({
-    data: {
-      tutorId: tutor1.id,
-      startAt: new Date("2025-09-15T10:00:00Z"),
-      endAt: new Date("2025-09-15T12:00:00Z"),
-      createdBy: "system",
-      updatedBy: "system",
-    },
-  });
 
   // Create sample reservations
   const reservation1 = await prisma.reservation.create({
@@ -367,7 +379,6 @@ async function main() {
     - 田中健一 (Kenichi Tanaka) - 数学/物理/化学, 東大院
     - 鈴木美智子 (Michiko Suzuki) - 英語/文学/美術, 早稲田大
   - 2 pairings (1 active, 1 pending)
-  - 1 availability slot
   - 1 reservation (confirmed)
   - 1 learning record
   - 1 calendar event

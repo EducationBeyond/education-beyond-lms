@@ -66,80 +66,17 @@ export function TutorProfileClient({ initialData }: TutorProfileClientProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="space-y-6">
-        <ImageUpload
-          currentImageUrl={avatarUrl}
-          onImageUpload={handleImageUpload}
-        />
+    <div className="space-y-6">
+      <ImageUpload
+        currentImageUrl={avatarUrl}
+        onImageUpload={handleImageUpload}
+      />
 
-        <ProfileForm
-          role="TUTOR"
-          initialData={initialData}
-          onSubmit={handleSubmit}
-        />
-      </div>
-
-      <div className="space-y-6">
-        {initialData.pairings && initialData.pairings.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>担当参加者</CardTitle>
-              <CardDescription>現在指導中の参加者一覧</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {initialData.pairings.map((pairing: any) => (
-                  <div key={pairing.id} className="border p-3 rounded-lg">
-                    <h4 className="font-semibold">{pairing.student.name}</h4>
-                    <p className="text-sm text-muted-foreground">
-                      ペアリングID: {pairing.id}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        <Card>
-          <CardHeader>
-            <CardTitle>稼働可能時間</CardTitle>
-            <CardDescription>設定された稼働可能時間帯</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {initialData.availabilities && initialData.availabilities.length > 0 ? (
-              <div className="space-y-2">
-                {initialData.availabilities.map((availability: any) => (
-                  <div key={availability.id} className="text-sm">
-                    {new Date(availability.startAt).toLocaleString('ja-JP')} -
-                    {new Date(availability.endAt).toLocaleString('ja-JP')}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-muted-foreground">稼働可能時間が設定されていません</p>
-            )}
-          </CardContent>
-        </Card>
-
-        {avatarUrl && (
-          <Card>
-            <CardHeader>
-              <CardTitle>現在のプロフィール画像</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Image
-                src={avatarUrl}
-                alt="プロフィール画像"
-                className="w-32 h-32 rounded-full object-cover mx-auto"
-                width={128}
-                height={128}
-              />
-            </CardContent>
-          </Card>
-        )}
-      </div>
+      <ProfileForm
+        role="TUTOR"
+        initialData={initialData}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 }
