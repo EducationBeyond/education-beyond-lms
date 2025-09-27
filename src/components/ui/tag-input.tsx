@@ -162,7 +162,7 @@ export function CheckboxTagInput({
   className,
   disabled = false,
   allowCustomTags = false,
-  placeholder = 'カスタムタグを追加...',
+  placeholder = 'その他...',
   maxTags,
 }: CheckboxTagInputProps) {
   const handleCheckboxChange = (optionValue: string, checked: boolean) => {
@@ -219,7 +219,7 @@ export function CheckboxTagInput({
       {allowCustomTags && (
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
-            カスタムタグ（任意）
+            その他（任意）
           </label>
           <TagInput
             value={customTags}

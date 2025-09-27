@@ -13,21 +13,34 @@ import { Eye, EyeOff, User, Mail, Lock, MapPin, Heart, UserCheck } from 'lucide-
 
 const studentRegistrationSchema = z.object({
   // 保護者情報
+  parentLastName: z.string().min(1, { message: '保護者の姓は必須です' }),
+  parentFirstName: z.string().min(1, { message: '保護者の名は必須です' }),
+  parentLastNameKana: z.string().min(1, { message: '保護者の姓（ふりがな）は必須です' }),
+  parentFirstNameKana: z.string().min(1, { message: '保護者の名（ふりがな）は必須です' }),
+  parentNameAlphabet: z.string().min(1, { message: '保護者の氏名（アルファベット）は必須です' }),
   parentEmail: z.string().email({ message: '有効なメールアドレスを入力してください' }),
   parentPassword: z.string().min(8, { message: 'パスワードは8文字以上で入力してください' }),
   parentConfirmPassword: z.string().min(8, { message: 'パスワードを再入力してください' }),
-  parentName: z.string().min(1, { message: '保護者名は必須です' }),
-  parentAddress: z.string().optional(),
+  parentPhoneNumber: z.string().min(1, { message: '電話番号は必須です' }),
+  parentPostalCode: z.string().min(1, { message: '郵便番号は必須です' }),
+  parentPrefecture: z.string().min(1, { message: '都道府県は必須です' }),
+  parentCity: z.string().min(1, { message: '市区町村は必須です' }),
+  parentAddressDetail: z.string().min(1, { message: 'それ以下の住所は必須です' }),
 
-  // 学生情報（メールアドレスとパスワードは運営側で後から設定）
-  name: z.string().min(1, { message: '名前は必須です' }),
-  furigana: z.string().optional(),
-  address: z.string().optional(),
-  birthdate: z.string().optional(),
-  gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
-  interests: z.array(z.string()).optional(),
-  giftedTraits: z.array(z.string()).optional(),
+  // 学生情報
+  entryType: z.string().optional(),
+  lastName: z.string().min(1, { message: '生徒の姓は必須です' }),
+  firstName: z.string().min(1, { message: '生徒の名は必須です' }),
+  lastNameKana: z.string().min(1, { message: '生徒の姓（ふりがな）は必須です' }),
+  firstNameKana: z.string().min(1, { message: '生徒の名（ふりがな）は必須です' }),
+  nameAlphabet: z.string().min(1, { message: '生徒の氏名（アルファベット）は必須です' }),
+  birthdate: z.string().min(1, { message: '生年月日は必須です' }),
+  gender: z.enum(['MALE', 'FEMALE', 'OTHER'], { message: '性別を選択してください' }),
+  giftedEpisodes: z.string().min(1, { message: '特異な才能があると思われるエピソードは必須です' }),
+  interests: z.array(z.string()).min(1, { message: '興味のある分野を1つ以上選択してください' }),
+  schoolName: z.string().min(1, { message: '学校名は必須です' }),
   cautions: z.string().optional(),
+  howDidYouKnow: z.string().optional(),
 })
 .refine((data) => data.parentPassword === data.parentConfirmPassword, {
   message: '保護者のパスワードが一致しません',
@@ -58,15 +71,19 @@ const interestOptions = [
   { value: 'other', label: 'その他' },
 ];
 
-const giftedTraitsOptions = [
-  '記憶力',
-  '集中力',
-  '論理的思考力',
-  '創造性',
-  '言語能力',
-  '数学的能力',
-  '芸術的才能',
-  'リーダーシップ',
+const entryTypeOptions = [
+  { value: 'general', label: '一般' },
+  { value: 'scholarship', label: '奨学生' },
+  { value: 'trial', label: '体験' },
+];
+
+const howDidYouKnowOptions = [
+  { value: 'search', label: 'インターネット検索' },
+  { value: 'sns', label: 'SNS' },
+  { value: 'friend', label: '知人の紹介' },
+  { value: 'school', label: '学校' },
+  { value: 'event', label: 'イベント' },
+  { value: 'other', label: 'その他' },
 ];
 
 export function StudentRegistrationForm() {
@@ -87,7 +104,6 @@ export function StudentRegistrationForm() {
   });
 
   const watchedInterests = watch('interests') || [];
-  const watchedGiftedTraits = watch('giftedTraits') || [];
 
   const onSubmit = async (data: StudentRegistrationForm) => {
     setIsSubmitting(true);
@@ -95,10 +111,18 @@ export function StudentRegistrationForm() {
     try {
       const {
         parentConfirmPassword,
+        parentLastName,
+        parentFirstName,
+        parentLastNameKana,
+        parentFirstNameKana,
+        parentNameAlphabet,
         parentEmail,
         parentPassword,
-        parentName,
-        parentAddress,
+        parentPhoneNumber,
+        parentPostalCode,
+        parentPrefecture,
+        parentCity,
+        parentAddressDetail,
         ...studentData
       } = data;
 
@@ -107,8 +131,16 @@ export function StudentRegistrationForm() {
         parent: {
           email: parentEmail,
           password: parentPassword,
-          name: parentName,
-          address: parentAddress || undefined,
+          lastName: parentLastName,
+          firstName: parentFirstName,
+          lastNameKana: parentLastNameKana,
+          firstNameKana: parentFirstNameKana,
+          nameAlphabet: parentNameAlphabet,
+          phoneNumber: parentPhoneNumber,
+          postalCode: parentPostalCode,
+          prefecture: parentPrefecture,
+          city: parentCity,
+          addressDetail: parentAddressDetail,
         },
         student: studentData,
       };
@@ -158,6 +190,26 @@ export function StudentRegistrationForm() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Parent Information */}
             <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    エントリー種別
+                  </label>
+                  <select
+                    {...register('entryType')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">選択してください</option>
+                    {entryTypeOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-4">
               <h3 className="text-lg font-medium flex items-center gap-2">
                 <UserCheck className="h-5 w-5" />
                 保護者情報
@@ -166,7 +218,86 @@ export function StudentRegistrationForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    保護者メールアドレス*
+                    姓*
+                  </label>
+                  <input
+                    {...register('parentLastName')}
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="山田"
+                  />
+                  {errors.parentLastName && (
+                    <p className="text-sm text-red-600 mt-1">{errors.parentLastName.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    名*
+                  </label>
+                  <input
+                    {...register('parentFirstName')}
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="花子"
+                  />
+                  {errors.parentFirstName && (
+                    <p className="text-sm text-red-600 mt-1">{errors.parentFirstName.message}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    姓（ふりがな）*
+                  </label>
+                  <input
+                    {...register('parentLastNameKana')}
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="やまだ"
+                  />
+                  {errors.parentLastNameKana && (
+                    <p className="text-sm text-red-600 mt-1">{errors.parentLastNameKana.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    名（ふりがな）*
+                  </label>
+                  <input
+                    {...register('parentFirstNameKana')}
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="はなこ"
+                  />
+                  {errors.parentFirstNameKana && (
+                    <p className="text-sm text-red-600 mt-1">{errors.parentFirstNameKana.message}</p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  氏名（アルファベット）*
+                </label>
+                <input
+                  {...register('parentNameAlphabet')}
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Hanako Yamada"
+                />
+                {errors.parentNameAlphabet && (
+                  <p className="text-sm text-red-600 mt-1">{errors.parentNameAlphabet.message}</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    メールアドレス*
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -184,16 +315,16 @@ export function StudentRegistrationForm() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    保護者名*
+                    電話番号*
                   </label>
                   <input
-                    {...register('parentName')}
-                    type="text"
+                    {...register('parentPhoneNumber')}
+                    type="tel"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="山田花子"
+                    placeholder="090-1234-5678"
                   />
-                  {errors.parentName && (
-                    <p className="text-sm text-red-600 mt-1">{errors.parentName.message}</p>
+                  {errors.parentPhoneNumber && (
+                    <p className="text-sm text-red-600 mt-1">{errors.parentPhoneNumber.message}</p>
                   )}
                 </div>
               </div>
@@ -201,7 +332,7 @@ export function StudentRegistrationForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    保護者パスワード*
+                    パスワード*
                   </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -226,7 +357,7 @@ export function StudentRegistrationForm() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    保護者パスワード確認*
+                    パスワード確認*
                   </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -250,18 +381,67 @@ export function StudentRegistrationForm() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  保護者住所（任意）
-                </label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    郵便番号*
+                  </label>
                   <input
-                    {...register('parentAddress')}
+                    {...register('parentPostalCode')}
                     type="text"
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="東京都渋谷区..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="123-4567"
                   />
+                  {errors.parentPostalCode && (
+                    <p className="text-sm text-red-600 mt-1">{errors.parentPostalCode.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    都道府県*
+                  </label>
+                  <input
+                    {...register('parentPrefecture')}
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="東京都"
+                  />
+                  {errors.parentPrefecture && (
+                    <p className="text-sm text-red-600 mt-1">{errors.parentPrefecture.message}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    市区町村*
+                  </label>
+                  <input
+                    {...register('parentCity')}
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="渋谷区"
+                  />
+                  {errors.parentCity && (
+                    <p className="text-sm text-red-600 mt-1">{errors.parentCity.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    それ以下の住所*
+                  </label>
+                  <input
+                    {...register('parentAddressDetail')}
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="道玄坂1-2-3"
+                  />
+                  {errors.parentAddressDetail && (
+                    <p className="text-sm text-red-600 mt-1">{errors.parentAddressDetail.message}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -276,47 +456,100 @@ export function StudentRegistrationForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    名前*
+                    姓*
                   </label>
                   <input
-                    {...register('name')}
+                    {...register('lastName')}
                     type="text"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="山田太郎"
+                    placeholder="山田"
                   />
-                  {errors.name && (
-                    <p className="text-sm text-red-600 mt-1">{errors.name.message}</p>
+                  {errors.lastName && (
+                    <p className="text-sm text-red-600 mt-1">{errors.lastName.message}</p>
                   )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    ふりがな
+                    名*
                   </label>
                   <input
-                    {...register('furigana')}
+                    {...register('firstName')}
                     type="text"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="やまだたろう"
+                    placeholder="太郎"
                   />
+                  {errors.firstName && (
+                    <p className="text-sm text-red-600 mt-1">{errors.firstName.message}</p>
+                  )}
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    生年月日
+                    姓（ふりがな）*
+                  </label>
+                  <input
+                    {...register('lastNameKana')}
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="やまだ"
+                  />
+                  {errors.lastNameKana && (
+                    <p className="text-sm text-red-600 mt-1">{errors.lastNameKana.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    名（ふりがな）*
+                  </label>
+                  <input
+                    {...register('firstNameKana')}
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="たろう"
+                  />
+                  {errors.firstNameKana && (
+                    <p className="text-sm text-red-600 mt-1">{errors.firstNameKana.message}</p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  氏名（アルファベット）*
+                </label>
+                <input
+                  {...register('nameAlphabet')}
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Taro Yamada"
+                />
+                {errors.nameAlphabet && (
+                  <p className="text-sm text-red-600 mt-1">{errors.nameAlphabet.message}</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    生年月日*
                   </label>
                   <input
                     {...register('birthdate')}
                     type="date"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
+                  {errors.birthdate && (
+                    <p className="text-sm text-red-600 mt-1">{errors.birthdate.message}</p>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    性別
+                    性別*
                   </label>
                   <select
                     {...register('gender')}
@@ -327,21 +560,43 @@ export function StudentRegistrationForm() {
                     <option value="FEMALE">女性</option>
                     <option value="OTHER">その他</option>
                   </select>
+                  {errors.gender && (
+                    <p className="text-sm text-red-600 mt-1">{errors.gender.message}</p>
+                  )}
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  住所
-                </label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    学校名*
+                  </label>
                   <input
-                    {...register('address')}
+                    {...register('schoolName')}
                     type="text"
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="東京都渋谷区..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="○○小学校"
                   />
+                  {errors.schoolName && (
+                    <p className="text-sm text-red-600 mt-1">{errors.schoolName.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    プログラムを知った経緯
+                  </label>
+                  <select
+                    {...register('howDidYouKnow')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">選択してください</option>
+                    {howDidYouKnowOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>
@@ -350,27 +605,41 @@ export function StudentRegistrationForm() {
             <div className="space-y-4 border-t pt-6">
               <h3 className="text-lg font-medium flex items-center gap-2">
                 <Heart className="h-5 w-5" />
-                興味のある分野（任意）
+                興味のある分野*
               </h3>
+              <CheckboxTagInput
+                value={watchedInterests}
+                onChange={(interests) => setValue('interests', interests)}
+                options={interestOptions}
+              />
+              {errors.interests && (
+                <p className="text-sm text-red-600 mt-1">{errors.interests.message}</p>
+              )}
             </div>
 
-            {/* Gifted Traits */}
+            {/* Gifted Episodes */}
             <div className="space-y-4 border-t pt-6">
-              <h3 className="text-lg font-medium">ギフテッド特性（任意）</h3>
-              <CheckboxTagInput
-                value={watchedGiftedTraits}
-                onChange={(traits) => setValue('giftedTraits', traits)}
-                options={giftedTraitsOptions.map(trait => ({ value: trait, label: trait }))}
-                allowCustomTags={true}
-                placeholder="カスタム特性を追加..."
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  特異な才能があると思われるエピソード*
+                </label>
+                <textarea
+                  {...register('giftedEpisodes')}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="お子様の特異な才能を示すエピソードがあれば記入してください"
+                />
+                {errors.giftedEpisodes && (
+                  <p className="text-sm text-red-600 mt-1">{errors.giftedEpisodes.message}</p>
+                )}
+              </div>
             </div>
 
             {/* Special Notes */}
             <div className="space-y-4 border-t pt-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  特記事項・配慮が必要なこと（任意）
+                  注意事項（任意）
                 </label>
                 <textarea
                   {...register('cautions')}

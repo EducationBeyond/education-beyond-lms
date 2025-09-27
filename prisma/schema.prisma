@@ -82,21 +82,29 @@ model VerificationToken {
 // ============================================================================
 
 model Parent {
-  id        String    @id @default(cuid())
-  email     String    @unique @db.Citext
+  id              String    @id @default(cuid())
+  email           String    @unique @db.Citext
   /// DEPRECATED: 認証は users.password_hash へ集約予定
-  password  String?
-  name      String
-  address   String?
-  userId    String?   @unique @map("user_id")
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
-  createdBy String?   @map("created_by")
-  updatedBy String?   @map("updated_by")
-  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+  password        String?
+  lastName        String    @map("last_name")
+  firstName       String    @map("first_name")
+  lastNameKana    String    @map("last_name_kana")
+  firstNameKana   String    @map("first_name_kana")
+  nameAlphabet    String    @map("name_alphabet")
+  phoneNumber     String    @map("phone_number")
+  postalCode      String    @map("postal_code")
+  prefecture      String
+  city            String
+  addressDetail   String    @map("address_detail")
+  userId          String    @unique @map("user_id")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy       String?   @map("created_by")
+  updatedBy       String?   @map("updated_by")
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz
 
   // Relations
-  user     User?     @relation(fields: [userId], references: [id])
+  user     User      @relation(fields: [userId], references: [id])
   students Student[]
   payments Payment[]
 
@@ -110,16 +118,21 @@ model Student {
   email            String?   @db.Citext // Optional: 運営側で後から設定
   /// DEPRECATED: 認証は users.password_hash へ集約予定
   password         String?
-  name             String
-  furigana         String?
+  entryType        String?   @map("entry_type") // エントリー種別
+  lastName         String    @map("last_name")
+  firstName        String    @map("first_name")
+  lastNameKana     String    @map("last_name_kana")
+  firstNameKana    String    @map("first_name_kana")
+  nameAlphabet     String    @map("name_alphabet")
   parentId         String    @map("parent_id")
-  userId           String?   @unique @map("user_id")
-  address          String?
-  birthdate        DateTime? @db.Date
-  gender           Gender?
-  giftedTraits     String[]  @map("gifted_traits")
-  interests        String[]
-  cautions         String?   @db.Text
+  userId           String    @unique @map("user_id")
+  birthdate        DateTime @db.Date
+  gender           Gender
+  giftedEpisodes   String    @map("gifted_episodes") @db.Text // 特異な才能があると思われるエピソード
+  interests        String[]  // 興味のある分野
+  schoolName       String    @map("school_name")
+  cautions         String?   @db.Text // 生徒注意事項
+  howDidYouKnow    String?   @map("how_did_you_know") // プログラムを知った経緯
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz
   createdBy        String?   @map("created_by")
@@ -127,7 +140,7 @@ model Student {
   deletedAt        DateTime? @map("deleted_at") @db.Timestamptz
 
   // Relations
-  user            User?            @relation(fields: [userId], references: [id])
+  user            User             @relation(fields: [userId], references: [id])
   parent          Parent           @relation(fields: [parentId], references: [id])
   learningRecords LearningRecord[]
   reservations    Reservation[]
@@ -140,28 +153,43 @@ model Student {
 }
 
 model Tutor {
-  id               String    @id @default(cuid())
-  email            String    @unique @db.Citext
+  id                   String    @id @default(cuid())
+  email                String    @unique @db.Citext
   /// DEPRECATED: 認証は users.password_hash へ集約予定
-  password         String?
-  name             String
-  furigana         String?
-  address          String?
-  affiliation      String?
-  specialties      String[]
-  avatarUrl        String?   @map("avatar_url")
-  bankAccountInfo  Json?     @map("bank_account_info")
-  interviewCalendarUrl String? @map("interview_calendar_url") // 事前面談用カレンダー
-  lessonCalendarUrl String?   @map("lesson_calendar_url")    // 研究予約用カレンダー
-  userId           String?   @unique @map("user_id")
-  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz
-  createdBy        String?   @map("created_by")
-  updatedBy        String?   @map("updated_by")
-  deletedAt        DateTime? @map("deleted_at") @db.Timestamptz
+  password             String?
+  lastName             String    @map("last_name")
+  firstName            String    @map("first_name")
+  lastNameKana         String    @map("last_name_kana")
+  firstNameKana        String    @map("first_name_kana")
+  nameAlphabet         String    @map("name_alphabet")
+  phoneNumber          String    @map("phone_number")
+  postalCode           String    @map("postal_code")
+  prefecture           String
+  city                 String
+  addressDetail        String    @map("address_detail")
+  nearestStation       String    @map("nearest_station")
+  affiliation          String
+  education            String    // 学歴
+  specialties          String[]  // 専門分野
+  selfIntroduction     String    @map("self_introduction") @db.Text
+  avatarUrl            String?   @map("avatar_url")
+  bankName             String    @map("bank_name")
+  bankCode             String    @map("bank_code")
+  branchName           String    @map("branch_name")
+  branchCode           String    @map("branch_code")
+  accountType          String    @map("account_type")
+  accountNumber        String    @map("account_number")
+  interviewCalendarUrl String?   @map("interview_calendar_url") // 事前面談用カレンダー
+  lessonCalendarUrl    String?   @map("lesson_calendar_url")    // 研究予約用カレンダー
+  userId               String    @unique @map("user_id")
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy            String?   @map("created_by")
+  updatedBy            String?   @map("updated_by")
+  deletedAt            DateTime? @map("deleted_at") @db.Timestamptz
 
   // Relations
-  user            User?            @relation(fields: [userId], references: [id])
+  user            User             @relation(fields: [userId], references: [id])
   learningRecords LearningRecord[]
   reservations    Reservation[]
   pairings        Pairing[]
