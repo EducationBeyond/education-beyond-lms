@@ -3,11 +3,12 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
+import { authPrisma } from "@/lib/auth-prisma";
 import { compare } from "bcryptjs";
 import { getUserRole, getRoleRedirectPath } from "@/lib/user-role";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(authPrisma),
   session: { strategy: "jwt" },
   secret: process.env.AUTH_SECRET,
   debug: process.env.NODE_ENV === 'development',
