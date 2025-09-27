@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
+import { notifyStudentRegistration } from '@/lib/slack';
 
 // 保護者と参加者の統合登録用スキーマ
 const parentStudentRegistrationSchema = z.object({
@@ -46,8 +47,18 @@ export async function POST(request: NextRequest) {
     // トランザクションで保護者と参加者を作成
     console.log('Starting transaction with data:', { parentData, studentData });
     const result = await prisma.$transaction(async (tx) => {
+      console.log('Creating user...');
+      // 1. まずUserレコードを作成
+      const user = await tx.user.create({
+        data: {
+          email: parentData.email,
+          name: `${parentData.lastName} ${parentData.firstName}`,
+          passwordHash: hashedParentPassword,
+        },
+      });
+
       console.log('Creating parent...');
-      // 1. 保護者を作成
+      // 2. 保護者を作成
       const createdParent = await tx.parent.create({
         data: {
           email: parentData.email,
@@ -62,7 +73,7 @@ export async function POST(request: NextRequest) {
           prefecture: '',
           city: '',
           addressDetail: '',
-          userId: `parent-${Date.now()}`,
+          userId: user.id, // 作成したUserのIDを参照
           createdBy: 'system',
           updatedBy: 'system',
         },
@@ -70,7 +81,7 @@ export async function POST(request: NextRequest) {
       console.log('Parent created with ID:', createdParent.id);
 
       console.log('Creating student...');
-      // 2. 参加者を作成（保護者と自動リンク、メールとパスワードは後から設定）
+      // 3. 参加者を作成（保護者と自動リンク、メールとパスワードは後から設定）
       const studentCreateData = {
         email: null, // 明示的にnullを設定（運営側で後から設定）
         password: null, // 明示的にnullを設定（運営側で後から設定）
@@ -97,8 +108,23 @@ export async function POST(request: NextRequest) {
       });
       console.log('Student created with ID:', createdStudent.id);
 
-      return { parent: createdParent, student: createdStudent };
+      return { user, parent: createdParent, student: createdStudent };
     });
+
+    // Slack通知を送信
+    try {
+      await notifyStudentRegistration({
+        name: `${result.student.lastName} ${result.student.firstName}`,
+        email: result.parent.email, // 保護者のメールアドレスを使用
+        parentName: `${result.parent.lastName} ${result.parent.firstName}`,
+        interests: result.student.interests,
+        grade: '', // 学年情報がない場合は空文字
+      });
+      console.log('[API Student Registration] Slack notification sent successfully');
+    } catch (error) {
+      console.error('[API Student Registration] Failed to send Slack notification:', error);
+      // Slack通知の失敗は登録成功の妨げにしない
+    }
 
     return NextResponse.json({
       success: true,
