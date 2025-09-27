@@ -37,16 +37,25 @@ const studentRegistrationSchema = z.object({
 type StudentRegistrationForm = z.infer<typeof studentRegistrationSchema>;
 
 const interestOptions = [
-  { value: 'mathematics', label: '数学' },
-  { value: 'english', label: '英語' },
-  { value: 'science', label: '理科' },
-  { value: 'japanese', label: '国語' },
-  { value: 'social_studies', label: '社会' },
-  { value: 'physics', label: '物理' },
-  { value: 'chemistry', label: '化学' },
-  { value: 'biology', label: '生物' },
+  { value: 'living_things', label: '生き物' },
+  { value: 'plants', label: '植物' },
+  { value: 'food_cooking', label: '食べ物・料理' },
+  { value: 'society_life', label: '社会・くらし' },
   { value: 'history', label: '歴史' },
-  { value: 'geography', label: '地理' },
+  { value: 'dinosaurs_fossils', label: '恐竜・化石' },
+  { value: 'science_chemistry', label: '科学・化学' },
+  { value: 'earth_space', label: '地球・宇宙' },
+  { value: 'sound_light', label: '音・光' },
+  { value: 'math_shapes', label: '算数・図形' },
+  { value: 'crafts_art', label: '工作・美術' },
+  { value: 'vehicles_machines', label: '乗り物・機械' },
+  { value: 'music_video', label: '音楽・映像' },
+  { value: 'language_stories', label: '言語・物語' },
+  { value: 'mind_thoughts', label: '心・思想' },
+  { value: 'body_health', label: 'からだ・健康' },
+  { value: 'environment_sdgs', label: '環境・SDGs' },
+  { value: 'programming', label: 'プログラミング' },
+  { value: 'other', label: 'その他' },
 ];
 
 const giftedTraitsOptions = [
@@ -343,13 +352,6 @@ export function StudentRegistrationForm() {
                 <Heart className="h-5 w-5" />
                 興味のある分野（任意）
               </h3>
-              <CheckboxTagInput
-                value={watchedInterests}
-                onChange={(interests) => setValue('interests', interests)}
-                options={interestOptions}
-                allowCustomTags={true}
-                placeholder="カスタム分野を追加..."
-              />
             </div>
 
             {/* Gifted Traits */}
