@@ -19,6 +19,7 @@
     "db:check": "node check-seed-data.js",
     "db:studio": "npx prisma studio",
     "db:format": "npx prisma format",
+    "db:test-connection": "node scripts/test-cloud-sql-connection.js",
     "auth:secret": "npx auth secret"
   },
   "prisma": {
@@ -57,6 +58,7 @@
     "lucide-react": "^0.542.0",
     "next": "^15.5.2",
     "next-auth": "^5.0.0-beta.29",
+    "pg": "^8.16.3",
     "postcss": "^8.5.6",
     "prisma": "^6.15.0",
     "react": "^19.1.1",

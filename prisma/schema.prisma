@@ -198,23 +198,23 @@ model Admin {
 }
 
 model LearningRecord {
-  id                    String    @id @default(cuid())
-  studentId             String    @map("student_id")
-  tutorId               String    @map("tutor_id")
-  date                  DateTime  @db.Date
-  summary               String
-  durationMin           Int       @map("duration_min")
-  goodPoints            String?   @map("good_points")
-  improvementPoints     String?   @map("improvement_points")
-  homework              String?
-  studentLate           Boolean   @default(false) @map("student_late")
-  tutorLate             Boolean   @default(false) @map("tutor_late")
-  additionalNotes       String?   @map("additional_notes")
-  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
-  deletedAt             DateTime? @map("deleted_at") @db.Timestamptz(6)
-  student               Student   @relation(fields: [studentId], references: [id])
-  tutor                 Tutor     @relation(fields: [tutorId], references: [id])
+  id                String    @id @default(cuid())
+  studentId         String    @map("student_id")
+  tutorId           String    @map("tutor_id")
+  date              DateTime  @db.Date
+  summary           String
+  durationMin       Int       @map("duration_min")
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt         DateTime? @map("deleted_at") @db.Timestamptz(6)
+  additionalNotes   String?   @map("additional_notes")
+  goodPoints        String?   @map("good_points")
+  homework          String?
+  improvementPoints String?   @map("improvement_points")
+  studentLate       Boolean   @default(false) @map("student_late")
+  tutorLate         Boolean   @default(false) @map("tutor_late")
+  student           Student   @relation(fields: [studentId], references: [id])
+  tutor             Tutor     @relation(fields: [tutorId], references: [id])
 
   @@index([studentId])
   @@index([tutorId])
@@ -273,7 +273,6 @@ model Pairing {
   @@index([deletedAt])
   @@map("pairings")
 }
-
 
 model CalendarEvent {
   id            String           @id @default(cuid())

@@ -40,3 +40,10 @@ next-env.d.ts
 
 # uploaded files
 /public/uploads
+
+# Google Cloud credentials
+gcp-service-account.json
+*.json
+!package*.json
+!tsconfig*.json
+!components.json

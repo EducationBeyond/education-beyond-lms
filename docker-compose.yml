@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  cloud-sql-proxy:
+    image: gcr.io/cloudsql-docker/gce-proxy:1.36.0
+    command: /cloud_sql_proxy -instances=${CLOUD_SQL_CONNECTION_NAME}=tcp:0.0.0.0:5432 -credential_file=/config/service-account.json
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./gcp-service-account.json:/config/service-account.json:ro
+    environment:
+      - CLOUD_SQL_CONNECTION_NAME=${CLOUD_SQL_CONNECTION_NAME}
+    restart: unless-stopped
+    networks:
+      - education-beyond-network
+
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@cloud-sql-proxy:5432/${DB_NAME}?schema=public
+      - DIRECT_URL=postgresql://${DB_USER}:${DB_PASSWORD}@cloud-sql-proxy:5432/${DB_NAME}?schema=public
+    depends_on:
+      - cloud-sql-proxy
+    networks:
+      - education-beyond-network
+
+networks:
+  education-beyond-network:
+    driver: bridge
