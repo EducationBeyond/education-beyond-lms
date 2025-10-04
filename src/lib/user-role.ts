@@ -44,12 +44,28 @@ export async function getUserRole(email: string): Promise<UserRole | null> {
   }
 }
 
-export function getRoleRedirectPath(role: UserRole): string {
+export async function getRoleRedirectPath(role: UserRole, email: string): Promise<string> {
   switch (role) {
     case 'student':
       return '/student';
     case 'parent':
-      return '/parent';
+      // 保護者の場合、紐付く最初のStudentページにリダイレクト
+      const parent = await prisma.parent.findUnique({
+        where: { email },
+        include: {
+          students: {
+            where: { deletedAt: null },
+            select: { id: true },
+            take: 1,
+          }
+        }
+      });
+
+      if (parent?.students[0]) {
+        return '/student';
+      }
+      // Studentが紐付いていない場合はデフォルトページ
+      return '/';
     case 'tutor':
       return '/tutor';
     case 'admin':

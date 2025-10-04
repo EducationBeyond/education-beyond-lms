@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const redirectPath = getRoleRedirectPath(role);
+    const redirectPath = await getRoleRedirectPath(role, email);
 
     return NextResponse.json({
       role,

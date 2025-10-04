@@ -56,11 +56,13 @@ export function Sidebar() {
 
     switch (userRole) {
       case 'parent':
+        // 保護者はstudentと同じメニューを表示
         return [
           ...baseItems,
-          { href: '/parent/profile', label: 'マイページ', icon: <User className="h-5 w-5" /> },
-          { href: '/parent/records', label: '学習記録', icon: <BookOpen className="h-5 w-5" /> },
-          { href: '/parent/tutor', label: '担当チューター', icon: <GraduationCap className="h-5 w-5" /> },
+          { href: '/student/profile', label: 'マイページ', icon: <User className="h-5 w-5" /> },
+          { href: '/student/records', label: '学習記録', icon: <BookOpen className="h-5 w-5" /> },
+          { href: '/student/tutors', label: 'チューター一覧', icon: <Users className="h-5 w-5" /> },
+          { href: '/student/tutor', label: '担当チューター', icon: <GraduationCap className="h-5 w-5" /> },
         ];
       case 'student':
         return [
