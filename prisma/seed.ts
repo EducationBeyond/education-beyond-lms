@@ -8,7 +8,6 @@ async function main() {
 
   // Clear existing data in dependency order
   console.log("🧹 Clearing existing data...");
-  await prisma.message.deleteMany();
   await prisma.messageLink.deleteMany();
   await prisma.cRMContact.deleteMany();
   await prisma.payment.deleteMany();
@@ -21,9 +20,6 @@ async function main() {
   await prisma.tutor.deleteMany();
   await prisma.student.deleteMany();
   await prisma.parent.deleteMany();
-  await prisma.externalAccount.deleteMany();
-  await prisma.session.deleteMany();
-  await prisma.account.deleteMany();
   await prisma.verificationToken.deleteMany();
   await prisma.user.deleteMany();
   console.log("✅ Data cleared successfully");

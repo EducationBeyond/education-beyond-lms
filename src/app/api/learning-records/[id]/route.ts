@@ -17,7 +17,7 @@ const updateLearningRecordSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -34,10 +34,12 @@ export async function GET(
       return NextResponse.json({ error: 'Tutor not found' }, { status: 404 });
     }
 
+    const { id } = await params;
+
     // 学習記録の取得（自分が作成したもののみ）
     const record = await prisma.learningRecord.findFirst({
       where: {
-        id: params.id,
+        id,
         tutorId: tutor.id
       },
       include: {
@@ -65,7 +67,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -82,13 +84,14 @@ export async function PUT(
       return NextResponse.json({ error: 'Tutor not found' }, { status: 404 });
     }
 
+    const { id } = await params;
     const body = await request.json();
     const validatedData = updateLearningRecordSchema.parse(body);
 
     // 学習記録の存在確認（自分が作成したもののみ）
     const existingRecord = await prisma.learningRecord.findFirst({
       where: {
-        id: params.id,
+        id,
         tutorId: tutor.id
       },
     });
@@ -99,7 +102,7 @@ export async function PUT(
 
     // 学習記録の更新
     const updatedRecord = await prisma.learningRecord.update({
-      where: { id: params.id },
+      where: { id },
       data: validatedData,
       include: {
         student: {
@@ -129,7 +132,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -146,10 +149,12 @@ export async function DELETE(
       return NextResponse.json({ error: 'Tutor not found' }, { status: 404 });
     }
 
+    const { id } = await params;
+
     // 学習記録の存在確認（自分が作成したもののみ）
     const existingRecord = await prisma.learningRecord.findFirst({
       where: {
-        id: params.id,
+        id,
         tutorId: tutor.id
       },
     });
@@ -160,7 +165,7 @@ export async function DELETE(
 
     // 学習記録の削除
     await prisma.learningRecord.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: 'Learning record deleted successfully' });

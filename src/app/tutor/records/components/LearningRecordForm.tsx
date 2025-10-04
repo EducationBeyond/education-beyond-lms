@@ -297,7 +297,7 @@ export function LearningRecordForm({ onSuccess, onCancel, editingRecord }: Learn
           <div className="flex gap-4 pt-4">
             <Button
               type="submit"
-              disabled={submitting || (!editingRecord && (!formData.studentId || !formData.summary.trim())) || (editingRecord && !formData.summary.trim())}
+              disabled={Boolean(submitting) || (!editingRecord && (!formData.studentId || !formData.summary.trim())) || Boolean(editingRecord && !formData.summary.trim())}
               className="flex items-center gap-2"
             >
               {submitting ? (

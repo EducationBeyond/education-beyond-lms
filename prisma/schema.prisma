@@ -121,6 +121,7 @@ model Student {
   password        String?
   schoolName      String           @map("school_name")
   userId          String?          @unique @map("user_id")
+  lineUserId      String?          @unique @map("line_user_id")
   learningRecords LearningRecord[]
   pairings        Pairing[]
   reservations    Reservation[]
@@ -129,6 +130,7 @@ model Student {
 
   @@index([parentId])
   @@index([deletedAt])
+  @@index([lineUserId])
   @@map("students")
 }
 
@@ -167,6 +169,7 @@ model Tutor {
   prefecture           String
   selfIntroduction     String           @map("self_introduction")
   userId               String           @unique @map("user_id")
+  slackUserId          String?          @unique @map("slack_user_id")
   learningRecords      LearningRecord[]
   pairings             Pairing[]
   reservations         Reservation[]
@@ -174,6 +177,7 @@ model Tutor {
 
   @@index([email])
   @@index([deletedAt])
+  @@index([slackUserId])
   @@map("tutors")
 }
 
@@ -250,27 +254,31 @@ model Reservation {
 }
 
 model Pairing {
-  id        String        @id @default(cuid())
-  studentId String        @map("student_id")
-  tutorId   String        @map("tutor_id")
-  status    PairingStatus @default(PENDING)
-  score     Float?
-  startedAt DateTime?     @map("started_at") @db.Timestamptz(6)
-  endedAt   DateTime?     @map("ended_at") @db.Timestamptz(6)
-  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
-  createdBy String?       @map("created_by")
-  updatedBy String?       @map("updated_by")
-  deletedAt DateTime?     @map("deleted_at") @db.Timestamptz(6)
-  messages  Message[]
-  student   Student       @relation(fields: [studentId], references: [id])
-  tutor     Tutor         @relation(fields: [tutorId], references: [id])
+  id             String        @id @default(cuid())
+  studentId      String        @map("student_id")
+  tutorId        String        @map("tutor_id")
+  status         PairingStatus @default(PENDING)
+  score          Float?
+  startedAt      DateTime?     @map("started_at") @db.Timestamptz(6)
+  endedAt        DateTime?     @map("ended_at") @db.Timestamptz(6)
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdBy      String?       @map("created_by")
+  updatedBy      String?       @map("updated_by")
+  deletedAt      DateTime?     @map("deleted_at") @db.Timestamptz(6)
+  lineGroupId    String?       @unique @map("line_group_id")
+  slackChannelId String?       @unique @map("slack_channel_id")
+  messages       Message[]
+  student        Student       @relation(fields: [studentId], references: [id])
+  tutor          Tutor         @relation(fields: [tutorId], references: [id])
 
   @@unique([studentId, tutorId])
   @@index([studentId])
   @@index([tutorId])
   @@index([status])
   @@index([deletedAt])
+  @@index([lineGroupId])
+  @@index([slackChannelId])
   @@map("pairings")
 }
 
